@@ -1,0 +1,932 @@
+/* ConnectSphere ISP Portal - Complete Styles */
+
+:root {
+    /* Brand Colors */
+    --primary: #0066FF;
+    --primary-dark: #0052CC;
+    --primary-light: #E6F0FF;
+    --secondary: #00D4AA;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
+    
+    /* Neutrals */
+    --dark: #1E293B;
+    --gray-900: #0F172A;
+    --gray-800: #1E293B;
+    --gray-700: #334155;
+    --gray-600: #475569;
+    --gray-500: #64748B;
+    --gray-400: #94A3B8;
+    --gray-300: #CBD5E1;
+    --gray-200: #E2E8F0;
+    --gray-100: #F1F5F9;
+    --light: #F8FAFC;
+    --white: #FFFFFF;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 6px 15px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Borders */
+    --radius-sm: 4px;
+    --radius: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    line-height: 1.5;
+    color: var(--dark);
+    background: var(--gray-50);
+    min-height: 100vh;
+}
+
+/* Loading Screen */
+.cs-loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.cs-loading-content {
+    text-align: center;
+    color: var(--white);
+}
+
+.cs-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--white);
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--space-lg);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Navbar */
+.cs-navbar {
+    background: var(--white);
+    box-shadow: var(--shadow);
+    padding: 0 var(--space-xl);
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.cs-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.cs-navbar-brand i {
+    font-size: 1.8rem;
+}
+
+.cs-navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+}
+
+.cs-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--gray-600);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: all 0.2s;
+    position: relative;
+}
+
+.cs-nav-item:hover {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+
+.cs-nav-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.cs-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+}
+
+.cs-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    padding: var(--space-sm) 0;
+    display: none;
+}
+
+.cs-nav-item.dropdown:hover .cs-dropdown-menu {
+    display: block;
+}
+
+.cs-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.cs-dropdown-menu a:hover {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+
+.cs-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: var(--space-sm) 0;
+}
+
+/* Main Content */
+.cs-main-content {
+    min-height: calc(100vh - 64px);
+}
+
+.cs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+}
+
+.cs-portal-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.cs-portal-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    color: var(--dark);
+}
+
+.cs-portal-header p {
+    font-size: 1.1rem;
+    color: var(--gray-600);
+}
+
+/* Stats Grid */
+.cs-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.cs-stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cs-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.cs-stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.cs-stat-card:nth-child(1) .cs-stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.cs-stat-card:nth-child(2) .cs-stat-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+}
+
+.cs-stat-card:nth-child(3) .cs-stat-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.cs-stat-content h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+}
+
+.cs-stat-content p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+/* Connection Card */
+.cs-connection-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    margin-bottom: var(--space-2xl);
+    box-shadow: var(--shadow);
+}
+
+.cs-connection-card h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    color: var(--dark);
+}
+
+.cs-connection-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.cs-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.cs-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.cs-form-group label {
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.cs-form-group input,
+.cs-form-group select {
+    padding: var(--space-md);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.cs-form-group input:focus,
+.cs-form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+}
+
+.cs-form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin: var(--space-lg) 0;
+}
+
+.cs-form-check input {
+    width: 18px;
+    height: 18px;
+}
+
+.cs-form-check label {
+    color: var(--gray-600);
+}
+
+.cs-form-check a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.cs-form-check a:hover {
+    text-decoration: underline;
+}
+
+.cs-connect-btn {
+    width: 100%;
+    padding: var(--space-lg);
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cs-connect-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.cs-connect-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.cs-divider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-xl) 0;
+    color: var(--gray-500);
+}
+
+.cs-divider::before,
+.cs-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gray-200);
+}
+
+.cs-divider span {
+    padding: 0 var(--space-md);
+}
+
+.cs-social-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-md);
+}
+
+.cs-social-btn {
+    padding: var(--space-md);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.cs-social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.cs-social-btn.google {
+    border-color: #DB4437;
+    color: #DB4437;
+}
+
+.cs-social-btn.google:hover {
+    background: rgba(219, 68, 55, 0.1);
+}
+
+.cs-social-btn.facebook {
+    border-color: #4267B2;
+    color: #4267B2;
+}
+
+.cs-social-btn.facebook:hover {
+    background: rgba(66, 103, 178, 0.1);
+}
+
+.cs-social-btn.voucher {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.cs-social-btn.voucher:hover {
+    background: var(--primary-light);
+}
+
+/* Connected Status */
+.cs-connected-status {
+    text-align: center;
+    padding: var(--space-2xl);
+}
+
+.cs-connected-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg);
+    font-size: 2.5rem;
+    color: var(--success);
+}
+
+.cs-connected-status h3 {
+    font-size: 1.8rem;
+    margin-bottom: var(--space-sm);
+    color: var(--dark);
+}
+
+.cs-connected-status p {
+    color: var(--gray-600);
+    margin-bottom: var(--space-lg);
+}
+
+.cs-connection-info {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+    text-align: left;
+}
+
+.cs-connection-info p {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.cs-connection-info p:last-child {
+    margin-bottom: 0;
+}
+
+.cs-disconnect-btn {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--danger);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.cs-disconnect-btn:hover {
+    background: #DC2626;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Services Section */
+.cs-services-section {
+    margin-bottom: var(--space-2xl);
+}
+
+.cs-services-section h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    color: var(--dark);
+}
+
+.cs-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+}
+
+.cs-service-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+}
+
+.cs-service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.cs-service-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-lg);
+    font-size: 1.8rem;
+}
+
+.cs-services-grid .cs-service-card:nth-child(1) .cs-service-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.cs-services-grid .cs-service-card:nth-child(2) .cs-service-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info);
+}
+
+.cs-services-grid .cs-service-card:nth-child(3) .cs-service-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.cs-service-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: var(--space-sm);
+    color: var(--dark);
+}
+
+.cs-service-card p {
+    color: var(--gray-600);
+    margin-bottom: var(--space-lg);
+}
+
+.cs-service-btn {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cs-service-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Activity Section */
+.cs-activity-section {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow);
+}
+
+.cs-activity-section h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    color: var(--dark);
+}
+
+.cs-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.cs-activity-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius);
+    transition: background 0.2s;
+}
+
+.cs-activity-item:hover {
+    background: var(--gray-50);
+}
+
+.cs-activity-item i {
+    color: var(--gray-400);
+}
+
+.cs-activity-item i.success {
+    color: var(--success);
+}
+
+.cs-activity-item i.info {
+    color: var(--info);
+}
+
+.cs-activity-content p {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.cs-activity-content small {
+    color: var(--gray-500);
+    font-size: 0.85rem;
+}
+
+.cs-empty-state {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+/* Footer */
+.cs-footer {
+    background: var(--gray-900);
+    color: var(--white);
+    padding: var(--space-2xl) 0;
+    margin-top: var(--space-3xl);
+}
+
+.cs-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+    text-align: center;
+}
+
+.cs-footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+}
+
+.cs-footer p {
+    color: var(--gray-400);
+    margin-bottom: var(--space-lg);
+}
+
+.cs-footer-links {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xl);
+    margin: var(--space-lg) 0;
+    flex-wrap: wrap;
+}
+
+.cs-footer-links a {
+    color: var(--gray-300);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.cs-footer-links a:hover {
+    color: var(--white);
+    text-decoration: underline;
+}
+
+.cs-copyright {
+    font-size: 0.9rem;
+    color: var(--gray-500);
+    margin-top: var(--space-xl);
+}
+
+/* Modal */
+.cs-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-modal-content {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
+
+.cs-modal-header {
+    padding: var(--space-xl);
+    background: var(--primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cs-modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.cs-modal-close {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    transition: background 0.2s;
+}
+
+.cs-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.cs-modal-body {
+    padding: var(--space-2xl);
+}
+
+.cs-voucher-input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    margin-bottom: var(--space-lg);
+}
+
+.cs-voucher-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.cs-voucher-btn {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    transition: all 0.2s;
+}
+
+.cs-voucher-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Notifications */
+.cs-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    animation: slideIn 0.3s ease;
+    max-width: 400px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.cs-notification.success {
+    border-left: 4px solid var(--success);
+}
+
+.cs-notification.error {
+    border-left: 4px solid var(--danger);
+}
+
+.cs-notification i {
+    font-size: 1.2rem;
+}
+
+.cs-notification.success i {
+    color: var(--success);
+}
+
+.cs-notification.error i {
+    color: var(--danger);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cs-navbar {
+        padding: 0 var(--space-md);
+    }
+    
+    .cs-navbar-menu {
+        gap: var(--space-sm);
+    }
+    
+    .cs-nav-item span {
+        display: none;
+    }
+    
+    .cs-container {
+        padding: var(--space-md);
+    }
+    
+    .cs-form-row {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+    
+    .cs-stats-grid,
+    .cs-services-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cs-social-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .cs-footer-links {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+}
