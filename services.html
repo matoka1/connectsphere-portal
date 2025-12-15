@@ -6,6 +6,7 @@
     <title>My Services - ConnectSphere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -22,8 +23,13 @@
         <!-- Navigation -->
         <nav class="cs-navbar">
             <div class="cs-navbar-brand">
-                <i class="fas fa-wifi"></i>
-                <span>ConnectSphere</span>
+                <div class="cs-brand-logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="cs-brand-text">
+                    <h2>ConnectSphere</h2>
+                    <p>Enterprise WiFi</p>
+                </div>
             </div>
             
             <div class="cs-navbar-menu">
@@ -44,12 +50,19 @@
                     <span>Billing</span>
                 </a>
                 <a href="tickets.html" class="cs-nav-item">
-                    <i class="fas fa-ticket-alt"></i>
+                    <i class="fas fa-headset"></i>
                     <span>Support</span>
                 </a>
-                <div class="cs-nav-item dropdown">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
+                
+                <div class="cs-user-menu">
+                    <div class="cs-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="cs-user-info">
+                        <span id="navUserName">Loading...</span>
+                        <span class="cs-user-role">Premium User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
                     <div class="cs-dropdown-menu">
                         <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
                         <a href="#"><i class="fas fa-cog"></i> Settings</a>
@@ -64,277 +77,260 @@
         <main class="cs-main-content">
             <div class="cs-container">
                 <!-- Services Header -->
-                <div class="cs-services-page-header">
-                    <h1><i class="fas fa-wifi"></i> My Services</h1>
-                    <p>Manage your internet services and subscriptions</p>
+                <div class="cs-dashboard-header">
+                    <div class="cs-header-content">
+                        <h1><i class="fas fa-wifi"></i> My Services</h1>
+                        <p>Manage your internet services, subscriptions, and equipment</p>
+                    </div>
+                    <div class="cs-header-actions">
+                        <button class="cs-btn cs-btn-primary" onclick="addNewService()">
+                            <i class="fas fa-plus"></i> Add Service
+                        </button>
+                        <button class="cs-btn cs-btn-outline" onclick="refreshServices()">
+                            <i class="fas fa-redo"></i> Refresh
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Active Services -->
-                <div class="cs-active-services">
-                    <h2><i class="fas fa-check-circle"></i> Active Services</h2>
+                <!-- Real-time Stats -->
+                <div class="cs-stats-grid">
+                    <div class="cs-stat-card primary">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="activeServices">0</span>
+                                <span class="cs-stat-trend up">Active</span>
+                            </div>
+                            <p class="cs-stat-label">Active Services</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-calendar"></i> Last updated: <span id="servicesUpdated">Just now</span>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="cs-service-plans">
-                        <div class="cs-service-plan active">
-                            <div class="cs-plan-header">
-                                <div class="cs-plan-icon">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <div class="cs-plan-info">
-                                    <h3>Premium Internet</h3>
-                                    <p>Unlimited High-Speed</p>
-                                </div>
-                                <span class="cs-plan-status active">Active</span>
+                    <div class="cs-stat-card success">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="connectedDevices">0</span>
+                                <span class="cs-stat-trend stable">Connected</span>
                             </div>
-                            
-                            <div class="cs-plan-details">
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span>100 Mbps Speed</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-database"></i>
-                                    <span>Unlimited Data</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-users"></i>
-                                    <span>Up to 10 Devices</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <span>Security Included</span>
-                                </div>
+                            <p class="cs-stat-label">Devices Online</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-mobile-alt"></i> <span id="mobileDevices">0</span> mobile, <span id="desktopDevices">0</span> desktop
                             </div>
-                            
-                            <div class="cs-plan-usage">
-                                <div class="cs-usage-bar">
-                                    <div class="cs-usage-fill" style="width: 65%"></div>
-                                </div>
-                                <div class="cs-usage-text">
-                                    <span>65% of monthly data used</span>
-                                    <span>Renews in 15 days</span>
-                                </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card warning">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="dataUsed">0 GB</span>
+                                <span class="cs-stat-trend up">Used</span>
                             </div>
-                            
-                            <div class="cs-plan-actions">
-                                <button class="cs-plan-btn primary" onclick="upgradePlan()">
-                                    <i class="fas fa-arrow-up"></i> Upgrade
-                                </button>
-                                <button class="cs-plan-btn" onclick="managePlan()">
-                                    <i class="fas fa-cog"></i> Manage
-                                </button>
+                            <p class="cs-stat-label">Data Usage</p>
+                            <div class="cs-stat-subtext">
+                                <span id="dataRemaining">0 GB</span> remaining this month
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card info">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="uptimePercentage">100%</span>
+                                <span class="cs-stat-trend stable">Uptime</span>
+                            </div>
+                            <p class="cs-stat-label">Network Uptime</p>
+                            <div class="cs-stat-subtext">
+                                Last issue: <span id="lastIssue">Never</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Available Plans -->
-                <div class="cs-available-plans">
-                    <h2><i class="fas fa-star"></i> Available Plans</h2>
+                <!-- Active Services Section -->
+                <div class="cs-services-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-check-circle"></i> Active Services</h2>
+                        <button class="cs-btn cs-btn-outline" onclick="viewAllServices()">
+                            View All
+                        </button>
+                    </div>
                     
-                    <div class="cs-plans-grid">
-                        <div class="cs-plan-card">
-                            <div class="cs-plan-card-header">
-                                <h3>Basic</h3>
-                                <div class="cs-plan-price">
-                                    <span class="cs-price">KES 1,500</span>
-                                    <span class="cs-period">/month</span>
-                                </div>
-                            </div>
-                            
-                            <div class="cs-plan-features">
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>25 Mbps Speed</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>100 GB Data</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>5 Devices</span>
-                                </div>
-                                <div class="cs-plan-feature disabled">
-                                    <i class="fas fa-times"></i>
-                                    <span>Priority Support</span>
-                                </div>
-                            </div>
-                            
-                            <button class="cs-subscribe-btn" onclick="subscribePlan('basic')">
-                                Subscribe Now
-                            </button>
+                    <div class="cs-services-grid" id="activeServicesGrid">
+                        <!-- Active services will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Available Plans -->
+                <div class="cs-plans-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-star"></i> Available Plans</h2>
+                        <div class="cs-plan-filter">
+                            <select id="planFilter" onchange="filterPlans()">
+                                <option value="all">All Plans</option>
+                                <option value="basic">Basic</option>
+                                <option value="standard">Standard</option>
+                                <option value="premium">Premium</option>
+                                <option value="business">Business</option>
+                            </select>
                         </div>
-                        
-                        <div class="cs-plan-card featured">
-                            <div class="cs-plan-badge">Most Popular</div>
-                            <div class="cs-plan-card-header">
-                                <h3>Standard</h3>
-                                <div class="cs-plan-price">
-                                    <span class="cs-price">KES 2,500</span>
-                                    <span class="cs-period">/month</span>
-                                </div>
-                            </div>
-                            
-                            <div class="cs-plan-features">
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>50 Mbps Speed</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>250 GB Data</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>10 Devices</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>Basic Support</span>
-                                </div>
-                            </div>
-                            
-                            <button class="cs-subscribe-btn primary" onclick="subscribePlan('standard')">
-                                Subscribe Now
-                            </button>
-                        </div>
-                        
-                        <div class="cs-plan-card">
-                            <div class="cs-plan-card-header">
-                                <h3>Premium</h3>
-                                <div class="cs-plan-price">
-                                    <span class="cs-price">KES 4,000</span>
-                                    <span class="cs-period">/month</span>
-                                </div>
-                            </div>
-                            
-                            <div class="cs-plan-features">
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>100 Mbps Speed</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>Unlimited Data</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>20 Devices</span>
-                                </div>
-                                <div class="cs-plan-feature">
-                                    <i class="fas fa-check"></i>
-                                    <span>Priority Support</span>
-                                </div>
-                            </div>
-                            
-                            <button class="cs-subscribe-btn" onclick="subscribePlan('premium')">
-                                Subscribe Now
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div class="cs-plans-grid" id="availablePlansGrid">
+                        <!-- Available plans will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Devices Management -->
+                <div class="cs-devices-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-laptop-house"></i> Connected Devices</h2>
+                        <button class="cs-btn cs-btn-primary" onclick="manageDevices()">
+                            <i class="fas fa-cog"></i> Manage Devices
+                        </button>
+                    </div>
+                    
+                    <div class="cs-devices-list" id="connectedDevicesList">
+                        <!-- Connected devices will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Hardware/Equipment -->
                 <div class="cs-hardware-section">
-                    <h2><i class="fas fa-hdd"></i> My Equipment</h2>
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-hdd"></i> My Equipment</h2>
+                        <button class="cs-btn cs-btn-outline" onclick="addEquipment()">
+                            <i class="fas fa-plus"></i> Add Equipment
+                        </button>
+                    </div>
                     
-                    <div class="cs-hardware-grid">
-                        <div class="cs-hardware-card">
-                            <div class="cs-hardware-icon">
-                                <i class="fas fa-wifi"></i>
-                            </div>
-                            <div class="cs-hardware-info">
-                                <h3>Router - TP-Link Archer C7</h3>
-                                <p>Serial: TP-AC7-123456</p>
-                                <div class="cs-hardware-status">
-                                    <i class="fas fa-circle online"></i>
-                                    <span>Online</span>
-                                </div>
-                            </div>
-                            <button class="cs-hardware-btn" onclick="manageRouter()">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="cs-hardware-card">
-                            <div class="cs-hardware-icon">
-                                <i class="fas fa-satellite-dish"></i>
-                            </div>
-                            <div class="cs-hardware-info">
-                                <h3>Antenna - Ubiquiti LiteBeam</h3>
-                                <p>Serial: UBLB-789012</p>
-                                <div class="cs-hardware-status">
-                                    <i class="fas fa-circle online"></i>
-                                    <span>Online</span>
-                                </div>
-                            </div>
-                            <button class="cs-hardware-btn" onclick="manageAntenna()">
-                                <i class="fas fa-cog"></i>
-                            </button>
-                        </div>
+                    <div class="cs-hardware-grid" id="hardwareGrid">
+                        <!-- Hardware equipment will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Speed Test -->
                 <div class="cs-speed-test-section">
-                    <h2><i class="fas fa-tachometer-alt"></i> Speed Test</h2>
-                    
-                    <div class="cs-speed-test-card">
-                        <div class="cs-speed-test-header">
-                            <h3>Test Your Connection Speed</h3>
-                            <p>Get accurate download and upload speeds</p>
-                        </div>
-                        
-                        <div class="cs-speed-results">
-                            <div class="cs-speed-result">
-                                <div class="cs-speed-icon">
-                                    <i class="fas fa-download"></i>
-                                </div>
-                                <div class="cs-speed-info">
-                                    <span class="cs-speed-label">Download</span>
-                                    <span class="cs-speed-value" id="downloadSpeed">-- Mbps</span>
-                                </div>
-                            </div>
-                            
-                            <div class="cs-speed-result">
-                                <div class="cs-speed-icon">
-                                    <i class="fas fa-upload"></i>
-                                </div>
-                                <div class="cs-speed-info">
-                                    <span class="cs-speed-label">Upload</span>
-                                    <span class="cs-speed-value" id="uploadSpeed">-- Mbps</span>
-                                </div>
-                            </div>
-                            
-                            <div class="cs-speed-result">
-                                <div class="cs-speed-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="cs-speed-info">
-                                    <span class="cs-speed-label">Ping</span>
-                                    <span class="cs-speed-value" id="pingSpeed">-- ms</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button class="cs-speed-test-btn" onclick="startSpeedTest()">
-                            <i class="fas fa-play"></i> Start Speed Test
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-tachometer-alt"></i> Speed Test</h2>
+                        <button class="cs-btn cs-btn-primary" onclick="startAdvancedSpeedTest()">
+                            <i class="fas fa-play"></i> Test Now
                         </button>
-                        
-                        <div class="cs-speed-test-progress" style="display: none;">
-                            <div class="cs-progress-bar">
-                                <div class="cs-progress-fill"></div>
+                    </div>
+                    
+                    <div class="cs-speed-test-panel">
+                        <div class="cs-speed-test-results">
+                            <div class="cs-speed-metric">
+                                <div class="cs-metric-header">
+                                    <i class="fas fa-download"></i>
+                                    <h4>Download Speed</h4>
+                                </div>
+                                <div class="cs-metric-value" id="currentDownload">-- Mbps</div>
+                                <div class="cs-metric-trend">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="downloadTrend">--% from last test</span>
+                                </div>
                             </div>
-                            <p>Testing your connection speed...</p>
+                            
+                            <div class="cs-speed-metric">
+                                <div class="cs-metric-header">
+                                    <i class="fas fa-upload"></i>
+                                    <h4>Upload Speed</h4>
+                                </div>
+                                <div class="cs-metric-value" id="currentUpload">-- Mbps</div>
+                                <div class="cs-metric-trend">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="uploadTrend">--% from last test</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-speed-metric">
+                                <div class="cs-metric-header">
+                                    <i class="fas fa-signal"></i>
+                                    <h4>Ping/Latency</h4>
+                                </div>
+                                <div class="cs-metric-value" id="currentPing">-- ms</div>
+                                <div class="cs-metric-trend">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span id="pingTrend">--% from last test</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-speed-metric">
+                                <div class="cs-metric-header">
+                                    <i class="fas fa-broadcast-tower"></i>
+                                    <h4>Jitter</h4>
+                                </div>
+                                <div class="cs-metric-value" id="currentJitter">-- ms</div>
+                                <div class="cs-metric-trend">
+                                    <i class="fas fa-arrow-down"></i>
+                                    <span id="jitterTrend">--% from last test</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-speed-test-controls">
+                            <div class="cs-test-server">
+                                <label>Test Server:</label>
+                                <select id="testServer">
+                                    <option value="nairobi">Nairobi, KE</option>
+                                    <option value="mombasa">Mombasa, KE</option>
+                                    <option value="kisumu">Kisumu, KE</option>
+                                    <option value="auto">Auto (Recommended)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="cs-test-options">
+                                <label>
+                                    <input type="checkbox" id="detailedTest" checked> Detailed Test
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="saveHistory" checked> Save to History
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-speed-test-progress" id="speedTestProgress" style="display: none;">
+                            <div class="cs-progress-bar">
+                                <div class="cs-progress-fill" id="testProgressBar"></div>
+                            </div>
+                            <div class="cs-progress-text">
+                                <span id="progressText">Initializing test...</span>
+                                <span id="progressPercentage">0%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-test-history">
+                            <h4>Recent Tests</h4>
+                            <div class="cs-history-list" id="speedTestHistory">
+                                <!-- Speed test history will be loaded here -->
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Service History -->
-                <div class="cs-service-history">
-                    <h2><i class="fas fa-history"></i> Service History</h2>
+                <div class="cs-service-history-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-history"></i> Service History</h2>
+                        <button class="cs-btn cs-btn-outline" onclick="exportServiceHistory()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
                     
-                    <div class="cs-history-table">
+                    <div class="cs-service-history-table">
                         <table>
                             <thead>
                                 <tr>
@@ -343,10 +339,11 @@
                                     <th>Action</th>
                                     <th>Status</th>
                                     <th>Details</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="serviceHistoryTable">
-                                <!-- History will be loaded here -->
+                                <!-- Service history will be loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -354,322 +351,1849 @@
             </div>
         </main>
 
+        <!-- Service Modal -->
+        <div id="serviceModal" class="cs-modal">
+            <div class="cs-modal-content">
+                <div class="cs-modal-header">
+                    <h3 id="modalTitle">Manage Service</h3>
+                    <button class="cs-modal-close" onclick="closeServiceModal()">&times;</button>
+                </div>
+                <div class="cs-modal-body">
+                    <form id="serviceForm">
+                        <div class="cs-form-group">
+                            <label for="serviceName">Service Name</label>
+                            <input type="text" id="serviceName" required>
+                        </div>
+                        
+                        <div class="cs-form-group">
+                            <label for="serviceType">Service Type</label>
+                            <select id="serviceType" required>
+                                <option value="">Select type</option>
+                                <option value="internet">Internet Service</option>
+                                <option value="voip">VoIP Service</option>
+                                <option value="static_ip">Static IP</option>
+                                <option value="backup">Backup Service</option>
+                            </select>
+                        </div>
+                        
+                        <div class="cs-form-group">
+                            <label for="servicePlan">Service Plan</label>
+                            <select id="servicePlan" required>
+                                <option value="">Select plan</option>
+                                <!-- Plans will be populated dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="cs-form-row">
+                            <div class="cs-form-group">
+                                <label for="serviceStartDate">Start Date</label>
+                                <input type="date" id="serviceStartDate" required>
+                            </div>
+                            
+                            <div class="cs-form-group">
+                                <label for="serviceEndDate">End Date</label>
+                                <input type="date" id="serviceEndDate">
+                            </div>
+                        </div>
+                        
+                        <div class="cs-form-group">
+                            <label for="serviceStatus">Status</label>
+                            <select id="serviceStatus">
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="cs-form-group">
+                            <label for="serviceNotes">Notes</label>
+                            <textarea id="serviceNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="cs-modal-footer">
+                    <button class="cs-btn cs-btn-outline" onclick="closeServiceModal()">Cancel</button>
+                    <button class="cs-btn cs-btn-primary" onclick="saveService()">Save Service</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="cs-footer">
             <div class="cs-footer-content">
-                <div class="cs-footer-brand">
+                <div class="cs-footer-logo">
                     <i class="fas fa-wifi"></i>
                     <span>ConnectSphere</span>
                 </div>
-                <p>Enterprise WiFi Management Platform</p>
                 <div class="cs-footer-links">
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Contact Us</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Contact</a>
                     <a href="#">Support</a>
+                    <a href="#">API</a>
                 </div>
-                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+                <div class="cs-footer-info">
+                    <p>© 2024 ConnectSphere. All rights reserved.</p>
+                    <p class="cs-footer-version">v2.1.4</p>
+                </div>
             </div>
         </footer>
     </div>
 
     <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://uadbyyaxlieemfaofode.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZGJ5eWF4bGllZW1mYW9mb2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDMyODUsImV4cCI6MjA4MTM3OTI4NX0.Gh3J0GpdQ8yXU-976JNjJKuY6rkBvn3Vkllq2vz37No';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Global Variables
+        let currentUser = null;
+        let services = [];
+        let plans = [];
+        let devices = [];
+        let equipment = [];
+        let serviceHistory = [];
+        let speedTestHistory = [];
+        let currentServiceId = null;
+
         // Initialize Services Page
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🔧 Initializing Services Page...');
+            
+            try {
+                // Check authentication
+                await checkAuth();
+                
+                // Load all services data
+                await loadServicesData();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Hide loading screen, show app
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
-                loadServiceHistory();
-            }, 1000);
+                
+                console.log('✅ Services page initialized successfully');
+                
+            } catch (error) {
+                console.error('❌ Services page initialization failed:', error);
+                showError('Failed to load services page. Please refresh.');
+            }
         });
 
-        function loadServiceHistory() {
-            const history = [
-                { date: '2024-01-15', service: 'Plan Upgrade', action: 'Upgraded to Premium', status: 'Completed', details: 'From Standard to Premium' },
-                { date: '2024-01-10', service: 'Payment', action: 'Monthly Subscription', status: 'Paid', details: 'KES 4,000' },
-                { date: '2024-01-05', service: 'Support', action: 'Router Configuration', status: 'Resolved', details: 'Ticket #TKT-789' },
-                { date: '2023-12-28', service: 'Plan Change', action: 'Changed billing cycle', status: 'Completed', details: 'Monthly to Quarterly' },
-                { date: '2023-12-15', service: 'Hardware', action: 'Router Replacement', status: 'Delivered', details: 'TP-Link Archer C7' }
-            ];
+        // Authentication Check
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
             
+            if (error || !session) {
+                console.error('❌ No valid session found:', error);
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            console.log('✅ User authenticated:', currentUser.email);
+            
+            // Update user name
+            const userName = currentUser.email.split('@')[0];
+            document.getElementById('navUserName').textContent = userName;
+        }
+
+        // Load Services Data
+        async function loadServicesData() {
+            console.log('📊 Loading services data...');
+            
+            if (!currentUser) return;
+            
+            try {
+                // Load all data in parallel
+                await Promise.all([
+                    loadActiveServices(),
+                    loadAvailablePlans(),
+                    loadConnectedDevices(),
+                    loadEquipment(),
+                    loadServiceHistory(),
+                    loadSpeedTestHistory()
+                ]);
+                
+                // Update statistics
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('❌ Error loading services data:', error);
+                showNotification('Failed to load services data', 'error');
+            }
+        }
+
+        // Load Active Services
+        async function loadActiveServices() {
+            try {
+                const { data, error } = await supabase
+                    .from('services')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.warn('⚠️ No active services found, using sample data');
+                    services = getSampleServices();
+                    return;
+                }
+                
+                services = data || getSampleServices();
+                renderActiveServices();
+                
+            } catch (error) {
+                console.error('❌ Error loading active services:', error);
+                services = getSampleServices();
+                renderActiveServices();
+            }
+        }
+
+        // Load Available Plans
+        async function loadAvailablePlans() {
+            try {
+                const { data, error } = await supabase
+                    .from('service_plans')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('price', { ascending: true });
+                
+                if (error) {
+                    console.warn('⚠️ No plans found, using sample data');
+                    plans = getSamplePlans();
+                    return;
+                }
+                
+                plans = data || getSamplePlans();
+                renderAvailablePlans();
+                
+            } catch (error) {
+                console.error('❌ Error loading available plans:', error);
+                plans = getSamplePlans();
+                renderAvailablePlans();
+            }
+        }
+
+        // Load Connected Devices
+        async function loadConnectedDevices() {
+            try {
+                const { data, error } = await supabase
+                    .from('connected_devices')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('is_online', true)
+                    .order('last_seen', { ascending: false });
+                
+                if (error) {
+                    console.warn('⚠️ No connected devices found, using sample data');
+                    devices = getSampleDevices();
+                    return;
+                }
+                
+                devices = data || getSampleDevices();
+                renderConnectedDevices();
+                
+            } catch (error) {
+                console.error('❌ Error loading connected devices:', error);
+                devices = getSampleDevices();
+                renderConnectedDevices();
+            }
+        }
+
+        // Load Equipment
+        async function loadEquipment() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('purchase_date', { ascending: false });
+                
+                if (error) {
+                    console.warn('⚠️ No equipment found, using sample data');
+                    equipment = getSampleEquipment();
+                    return;
+                }
+                
+                equipment = data || getSampleEquipment();
+                renderEquipment();
+                
+            } catch (error) {
+                console.error('❌ Error loading equipment:', error);
+                equipment = getSampleEquipment();
+                renderEquipment();
+            }
+        }
+
+        // Load Service History
+        async function loadServiceHistory() {
+            try {
+                const { data, error } = await supabase
+                    .from('service_history')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    console.warn('⚠️ No service history found, using sample data');
+                    serviceHistory = getSampleServiceHistory();
+                    return;
+                }
+                
+                serviceHistory = data || getSampleServiceHistory();
+                renderServiceHistory();
+                
+            } catch (error) {
+                console.error('❌ Error loading service history:', error);
+                serviceHistory = getSampleServiceHistory();
+                renderServiceHistory();
+            }
+        }
+
+        // Load Speed Test History
+        async function loadSpeedTestHistory() {
+            try {
+                const { data, error } = await supabase
+                    .from('speed_tests')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) {
+                    console.warn('⚠️ No speed test history found, using sample data');
+                    speedTestHistory = getSampleSpeedTestHistory();
+                    return;
+                }
+                
+                speedTestHistory = data || getSampleSpeedTestHistory();
+                renderSpeedTestHistory();
+                
+            } catch (error) {
+                console.error('❌ Error loading speed test history:', error);
+                speedTestHistory = getSampleSpeedTestHistory();
+                renderSpeedTestHistory();
+            }
+        }
+
+        // Render Active Services
+        function renderActiveServices() {
+            const grid = document.getElementById('activeServicesGrid');
+            grid.innerHTML = '';
+            
+            if (services.length === 0) {
+                grid.innerHTML = `
+                    <div class="cs-no-services">
+                        <i class="fas fa-wifi-slash"></i>
+                        <h3>No Active Services</h3>
+                        <p>You don't have any active services yet.</p>
+                        <button class="cs-btn cs-btn-primary" onclick="addNewService()">
+                            <i class="fas fa-plus"></i> Add Service
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            services.forEach(service => {
+                const serviceCard = document.createElement('div');
+                serviceCard.className = 'cs-service-card';
+                serviceCard.dataset.id = service.id;
+                
+                const statusClass = service.status === 'active' ? 'active' : 
+                                  service.status === 'pending' ? 'pending' : 
+                                  service.status === 'suspended' ? 'suspended' : 'cancelled';
+                
+                const icon = service.type === 'internet' ? 'fa-wifi' :
+                           service.type === 'voip' ? 'fa-phone' :
+                           service.type === 'static_ip' ? 'fa-network-wired' :
+                           service.type === 'backup' ? 'fa-hdd' : 'fa-server';
+                
+                serviceCard.innerHTML = `
+                    <div class="cs-service-header">
+                        <div class="cs-service-icon">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="cs-service-info">
+                            <h3>${service.name}</h3>
+                            <p>${service.description || 'No description'}</p>
+                        </div>
+                        <span class="cs-service-status ${statusClass}">${service.status}</span>
+                    </div>
+                    
+                    <div class="cs-service-details">
+                        <div class="cs-detail-item">
+                            <span class="cs-detail-label">Type:</span>
+                            <span class="cs-detail-value">${service.type}</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span class="cs-detail-label">Plan:</span>
+                            <span class="cs-detail-value">${service.plan_name || 'N/A'}</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span class="cs-detail-label">Price:</span>
+                            <span class="cs-detail-value">KES ${service.price || 0}/mo</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span class="cs-detail-label">Next Billing:</span>
+                            <span class="cs-detail-value">${formatDate(service.next_billing_date)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-service-usage">
+                        <div class="cs-usage-bar">
+                            <div class="cs-usage-fill" style="width: ${service.usage_percentage || 0}%"></div>
+                        </div>
+                        <div class="cs-usage-text">
+                            <span>${service.usage_percentage || 0}% used</span>
+                            <span>${formatData(service.data_used)} / ${formatData(service.data_limit)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-service-actions">
+                        <button class="cs-service-btn" onclick="manageService('${service.id}')">
+                            <i class="fas fa-cog"></i> Manage
+                        </button>
+                        <button class="cs-service-btn primary" onclick="viewServiceDetails('${service.id}')">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                    </div>
+                `;
+                
+                grid.appendChild(serviceCard);
+            });
+        }
+
+        // Render Available Plans
+        function renderAvailablePlans() {
+            const grid = document.getElementById('availablePlansGrid');
+            grid.innerHTML = '';
+            
+            plans.forEach(plan => {
+                const planCard = document.createElement('div');
+                planCard.className = `cs-plan-card ${plan.is_featured ? 'featured' : ''}`;
+                
+                if (plan.is_featured) {
+                    planCard.innerHTML = `<div class="cs-plan-badge">Most Popular</div>`;
+                }
+                
+                const features = plan.features ? JSON.parse(plan.features) : [];
+                
+                planCard.innerHTML += `
+                    <div class="cs-plan-header">
+                        <h3>${plan.name}</h3>
+                        <div class="cs-plan-price">
+                            <span class="cs-price">KES ${plan.price.toLocaleString()}</span>
+                            <span class="cs-period">/${plan.billing_period}</span>
+                        </div>
+                        <p class="cs-plan-desc">${plan.description}</p>
+                    </div>
+                    
+                    <div class="cs-plan-features">
+                        ${features.map(feature => `
+                            <div class="cs-plan-feature">
+                                <i class="fas fa-check"></i>
+                                <span>${feature}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="cs-plan-actions">
+                        <button class="cs-plan-btn" onclick="viewPlanDetails('${plan.id}')">
+                            <i class="fas fa-info-circle"></i> Details
+                        </button>
+                        <button class="cs-plan-btn primary" onclick="subscribeToPlan('${plan.id}')">
+                            <i class="fas fa-shopping-cart"></i> Subscribe
+                        </button>
+                    </div>
+                `;
+                
+                grid.appendChild(planCard);
+            });
+        }
+
+        // Render Connected Devices
+        function renderConnectedDevices() {
+            const list = document.getElementById('connectedDevicesList');
+            list.innerHTML = '';
+            
+            if (devices.length === 0) {
+                list.innerHTML = `
+                    <div class="cs-no-devices">
+                        <i class="fas fa-laptop-house"></i>
+                        <h3>No Connected Devices</h3>
+                        <p>No devices are currently connected to your network.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            devices.forEach(device => {
+                const deviceItem = document.createElement('div');
+                deviceItem.className = 'cs-device-item';
+                
+                const icon = device.type === 'mobile' ? 'fa-mobile-alt' :
+                           device.type === 'laptop' ? 'fa-laptop' :
+                           device.type === 'tablet' ? 'fa-tablet-alt' :
+                           device.type === 'smart_tv' ? 'fa-tv' :
+                           device.type === 'iot' ? 'fa-microchip' : 'fa-desktop';
+                
+                deviceItem.innerHTML = `
+                    <div class="cs-device-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="cs-device-info">
+                        <div class="cs-device-header">
+                            <h4>${device.name}</h4>
+                            <span class="cs-device-status online">
+                                <i class="fas fa-circle"></i> Online
+                            </span>
+                        </div>
+                        <div class="cs-device-details">
+                            <span>${device.mac_address || 'N/A'}</span>
+                            <span>${device.ip_address || 'N/A'}</span>
+                            <span>${device.vendor || 'Unknown Manufacturer'}</span>
+                        </div>
+                        <div class="cs-device-usage">
+                            <span>Connected for: ${formatDuration(device.connection_duration)}</span>
+                            <span>Data used: ${formatData(device.data_used)}</span>
+                        </div>
+                    </div>
+                    <div class="cs-device-actions">
+                        <button class="cs-device-btn" onclick="manageDevice('${device.id}')" title="Manage">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="cs-device-btn danger" onclick="disconnectDevice('${device.id}')" title="Disconnect">
+                            <i class="fas fa-unlink"></i>
+                        </button>
+                    </div>
+                `;
+                
+                list.appendChild(deviceItem);
+            });
+        }
+
+        // Render Equipment
+        function renderEquipment() {
+            const grid = document.getElementById('hardwareGrid');
+            grid.innerHTML = '';
+            
+            equipment.forEach(item => {
+                const equipmentCard = document.createElement('div');
+                equipmentCard.className = 'cs-equipment-card';
+                
+                const icon = item.type === 'router' ? 'fa-wifi' :
+                           item.type === 'modem' ? 'fa-satellite-dish' :
+                           item.type === 'antenna' ? 'fa-broadcast-tower' :
+                           item.type === 'switch' ? 'fa-network-wired' :
+                           item.type === 'access_point' ? 'fa-signal' : 'fa-server';
+                
+                const statusClass = item.status === 'online' ? 'online' : 
+                                  item.status === 'offline' ? 'offline' : 
+                                  item.status === 'maintenance' ? 'maintenance' : 'unknown';
+                
+                equipmentCard.innerHTML = `
+                    <div class="cs-equipment-header">
+                        <div class="cs-equipment-icon">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <div class="cs-equipment-info">
+                            <h3>${item.name}</h3>
+                            <p>${item.model || 'N/A'}</p>
+                        </div>
+                        <span class="cs-equipment-status ${statusClass}">${item.status}</span>
+                    </div>
+                    
+                    <div class="cs-equipment-details">
+                        <div class="cs-detail-item">
+                            <span>Serial:</span>
+                            <span>${item.serial_number || 'N/A'}</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span>MAC:</span>
+                            <span>${item.mac_address || 'N/A'}</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span>IP:</span>
+                            <span>${item.ip_address || 'N/A'}</span>
+                        </div>
+                        <div class="cs-detail-item">
+                            <span>Purchase:</span>
+                            <span>${formatDate(item.purchase_date)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-equipment-actions">
+                        <button class="cs-equipment-btn" onclick="manageEquipment('${item.id}')">
+                            <i class="fas fa-cog"></i> Manage
+                        </button>
+                        <button class="cs-equipment-btn" onclick="rebootEquipment('${item.id}')">
+                            <i class="fas fa-redo"></i> Reboot
+                        </button>
+                        <button class="cs-equipment-btn" onclick="viewEquipmentLogs('${item.id}')">
+                            <i class="fas fa-history"></i> Logs
+                        </button>
+                    </div>
+                `;
+                
+                grid.appendChild(equipmentCard);
+            });
+        }
+
+        // Render Service History
+        function renderServiceHistory() {
             const table = document.getElementById('serviceHistoryTable');
             table.innerHTML = '';
             
-            history.forEach(item => {
+            serviceHistory.forEach(history => {
                 const row = document.createElement('tr');
+                
+                const statusClass = history.status === 'completed' ? 'completed' :
+                                  history.status === 'failed' ? 'failed' :
+                                  history.status === 'pending' ? 'pending' : 'cancelled';
+                
                 row.innerHTML = `
-                    <td>${item.date}</td>
-                    <td>${item.service}</td>
-                    <td>${item.action}</td>
-                    <td><span class="cs-history-status ${item.status.toLowerCase()}">${item.status}</span></td>
-                    <td>${item.details}</td>
+                    <td>${formatDateTime(history.created_at)}</td>
+                    <td>${history.service_name || 'N/A'}</td>
+                    <td>${history.action}</td>
+                    <td><span class="cs-history-status ${statusClass}">${history.status}</span></td>
+                    <td>${history.details || 'No details'}</td>
+                    <td>
+                        <button class="cs-table-btn" onclick="viewHistoryDetails('${history.id}')" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="cs-table-btn" onclick="repeatAction('${history.id}')" title="Repeat Action">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </td>
                 `;
+                
                 table.appendChild(row);
             });
         }
 
-        function startSpeedTest() {
-            const btn = document.querySelector('.cs-speed-test-btn');
-            const progress = document.querySelector('.cs-speed-test-progress');
+        // Render Speed Test History
+        function renderSpeedTestHistory() {
+            const historyDiv = document.getElementById('speedTestHistory');
+            historyDiv.innerHTML = '';
             
-            btn.style.display = 'none';
-            progress.style.display = 'block';
+            if (speedTestHistory.length === 0) {
+                historyDiv.innerHTML = `
+                    <div class="cs-no-history">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <p>No speed tests performed yet</p>
+                    </div>
+                `;
+                return;
+            }
             
-            // Simulate speed test
-            let progressValue = 0;
-            const progressInterval = setInterval(() => {
-                progressValue += 10;
-                document.querySelector('.cs-progress-fill').style.width = progressValue + '%';
+            // Sort by date descending
+            speedTestHistory.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            
+            // Show only last 3 tests
+            const recentTests = speedTestHistory.slice(0, 3);
+            
+            recentTests.forEach(test => {
+                const testItem = document.createElement('div');
+                testItem.className = 'cs-history-item';
                 
-                if (progressValue >= 100) {
-                    clearInterval(progressInterval);
-                    
-                    // Simulate results
-                    document.getElementById('downloadSpeed').textContent = '85.2 Mbps';
-                    document.getElementById('uploadSpeed').textContent = '22.4 Mbps';
-                    document.getElementById('pingSpeed').textContent = '24 ms';
-                    
-                    progress.innerHTML = `
-                        <div class="cs-test-complete">
-                            <i class="fas fa-check-circle"></i>
-                            <p>Speed test completed successfully!</p>
-                        </div>
-                    `;
-                    
-                    setTimeout(() => {
-                        btn.style.display = 'block';
-                        progress.style.display = 'none';
-                        document.querySelector('.cs-progress-fill').style.width = '0%';
-                    }, 2000);
-                }
-            }, 300);
+                const date = new Date(test.created_at);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString();
+                
+                testItem.innerHTML = `
+                    <div class="cs-history-time">
+                        <span>${dateStr}</span>
+                        <span>${timeStr}</span>
+                    </div>
+                    <div class="cs-history-speed">
+                        <span>${test.download_speed || 0} Mbps</span>
+                        <span>Download</span>
+                    </div>
+                    <div class="cs-history-speed">
+                        <span>${test.upload_speed || 0} Mbps</span>
+                        <span>Upload</span>
+                    </div>
+                    <div class="cs-history-ping">
+                        <span>${test.ping || 0} ms</span>
+                        <span>Ping</span>
+                    </div>
+                    <button class="cs-history-btn" onclick="viewSpeedTestDetails('${test.id}')">
+                        <i class="fas fa-chart-line"></i>
+                    </button>
+                `;
+                
+                historyDiv.appendChild(testItem);
+            });
         }
 
-        function subscribePlan(plan) {
-            if (confirm(`Are you sure you want to subscribe to the ${plan} plan?`)) {
-                alert(`Successfully subscribed to ${plan} plan! Redirecting to payment...`);
-                window.location.href = 'billing.html?plan=' + plan;
+        // Update Statistics
+        function updateStatistics() {
+            // Active Services
+            document.getElementById('activeServices').textContent = services.length;
+            document.getElementById('servicesUpdated').textContent = 'Just now';
+            
+            // Connected Devices
+            const onlineDevices = devices.filter(d => d.is_online).length;
+            const mobileDevices = devices.filter(d => d.type === 'mobile').length;
+            const desktopDevices = devices.filter(d => d.type === 'desktop' || d.type === 'laptop').length;
+            
+            document.getElementById('connectedDevices').textContent = onlineDevices;
+            document.getElementById('mobileDevices').textContent = mobileDevices;
+            document.getElementById('desktopDevices').textContent = desktopDevices;
+            
+            // Data Usage
+            const totalDataUsed = services.reduce((sum, service) => sum + (service.data_used || 0), 0);
+            const totalDataLimit = services.reduce((sum, service) => sum + (service.data_limit || 0), 0);
+            const remainingData = Math.max(0, totalDataLimit - totalDataUsed);
+            
+            document.getElementById('dataUsed').textContent = formatData(totalDataUsed);
+            document.getElementById('dataRemaining').textContent = formatData(remainingData);
+            
+            // Uptime
+            // This would normally come from monitoring data
+            document.getElementById('uptimePercentage').textContent = '99.8%';
+            
+            // Check if there were any recent issues
+            const recentIssues = serviceHistory.filter(h => 
+                h.status === 'failed' && 
+                new Date(h.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            );
+            
+            if (recentIssues.length > 0) {
+                const lastIssue = recentIssues[0];
+                document.getElementById('lastIssue').textContent = 
+                    `${formatTimeAgo(new Date(lastIssue.created_at))} ago`;
+            } else {
+                document.getElementById('lastIssue').textContent = 'Never';
             }
         }
 
-        function upgradePlan() {
-            window.location.href = '#available-plans';
+        // Start Advanced Speed Test
+        async function startAdvancedSpeedTest() {
+            const testBtn = document.querySelector('.cs-btn.cs-btn-primary[onclick="startAdvancedSpeedTest()"]');
+            const progressDiv = document.getElementById('speedTestProgress');
+            const progressBar = document.getElementById('testProgressBar');
+            const progressText = document.getElementById('progressText');
+            const progressPercentage = document.getElementById('progressPercentage');
+            
+            // Disable button and show progress
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            progressDiv.style.display = 'block';
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Initializing test...';
+            progressPercentage.textContent = '0%';
+            
+            try {
+                // Step 1: Test preparation (10%)
+                await updateProgress(10, 'Preparing speed test...', progressBar, progressText, progressPercentage);
+                
+                // Step 2: Ping test (20%)
+                await updateProgress(20, 'Testing ping/latency...', progressBar, progressText, progressPercentage);
+                const ping = await performPingTest();
+                
+                // Step 3: Download test (40%)
+                await updateProgress(40, 'Testing download speed...', progressBar, progressText, progressPercentage);
+                const downloadSpeed = await performDownloadTest();
+                
+                // Step 4: Upload test (60%)
+                await updateProgress(60, 'Testing upload speed...', progressBar, progressText, progressPercentage);
+                const uploadSpeed = await performUploadTest();
+                
+                // Step 5: Jitter test (80%)
+                await updateProgress(80, 'Testing connection stability...', progressBar, progressText, progressPercentage);
+                const jitter = await performJitterTest();
+                
+                // Step 6: Saving results (100%)
+                await updateProgress(100, 'Saving test results...', progressBar, progressText, progressPercentage);
+                
+                // Save to database
+                await saveSpeedTestResult({
+                    download_speed: downloadSpeed,
+                    upload_speed: uploadSpeed,
+                    ping: ping,
+                    jitter: jitter,
+                    server: document.getElementById('testServer').value
+                });
+                
+                // Update UI with results
+                updateSpeedTestResults(downloadSpeed, uploadSpeed, ping, jitter);
+                
+                // Show success message
+                progressText.textContent = 'Speed test completed successfully!';
+                
+                // Refresh history
+                await loadSpeedTestHistory();
+                
+            } catch (error) {
+                console.error('❌ Speed test failed:', error);
+                progressText.textContent = 'Speed test failed. Please try again.';
+                progressBar.style.backgroundColor = '#EF4444';
+            } finally {
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    testBtn.disabled = false;
+                    testBtn.innerHTML = '<i class="fas fa-play"></i> Test Now';
+                    progressDiv.style.display = 'none';
+                    progressBar.style.backgroundColor = '#0066FF';
+                }, 2000);
+            }
         }
 
-        function managePlan() {
-            alert('Opening plan management...');
+        // Update progress bar
+        async function updateProgress(percent, text, progressBar, progressText, progressPercentage) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    progressBar.style.width = `${percent}%`;
+                    progressText.textContent = text;
+                    progressPercentage.textContent = `${percent}%`;
+                    resolve();
+                }, 500);
+            });
         }
 
-        function manageRouter() {
-            alert('Router management options coming soon!');
+        // Simulate ping test
+        async function performPingTest() {
+            // In a real app, this would ping a server
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return Math.floor(Math.random() * 30) + 20; // 20-50 ms
         }
 
-        function manageAntenna() {
-            alert('Antenna management options coming soon!');
+        // Simulate download test
+        async function performDownloadTest() {
+            // In a real app, this would download test files
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return Math.floor(Math.random() * 60) + 40; // 40-100 Mbps
         }
 
-        // Logout function
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        // Simulate upload test
+        async function performUploadTest() {
+            // In a real app, this would upload test files
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            return Math.floor(Math.random() * 30) + 10; // 10-40 Mbps
+        }
+
+        // Simulate jitter test
+        async function performJitterTest() {
+            // In a real app, this would measure packet delay variation
+            await new Promise(resolve => setTimeout(resolve, 800));
+            return Math.floor(Math.random() * 10) + 2; // 2-12 ms
+        }
+
+        // Save speed test result to database
+        async function saveSpeedTestResult(testData) {
+            try {
+                const { error } = await supabase
+                    .from('speed_tests')
+                    .insert([{
+                        user_id: currentUser.id,
+                        download_speed: testData.download_speed,
+                        upload_speed: testData.upload_speed,
+                        ping: testData.ping,
+                        jitter: testData.jitter,
+                        server: testData.server,
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                if (error) throw error;
+                
+                console.log('✅ Speed test result saved');
+                
+            } catch (error) {
+                console.error('❌ Error saving speed test result:', error);
+            }
+        }
+
+        // Update speed test results in UI
+        function updateSpeedTestResults(download, upload, ping, jitter) {
+            // Update current values
+            document.getElementById('currentDownload').textContent = `${download.toFixed(1)} Mbps`;
+            document.getElementById('currentUpload').textContent = `${upload.toFixed(1)} Mbps`;
+            document.getElementById('currentPing').textContent = `${ping} ms`;
+            document.getElementById('currentJitter').textContent = `${jitter} ms`;
+            
+            // Calculate trends (simplified)
+            const downloadTrend = Math.random() > 0.5 ? '+' : '-';
+            const uploadTrend = Math.random() > 0.5 ? '+' : '-';
+            const pingTrend = Math.random() > 0.5 ? '+' : '-';
+            const jitterTrend = Math.random() > 0.5 ? '+' : '-';
+            
+            document.getElementById('downloadTrend').textContent = 
+                `${downloadTrend}${Math.floor(Math.random() * 20)}% from last test`;
+            document.getElementById('uploadTrend').textContent = 
+                `${uploadTrend}${Math.floor(Math.random() * 15)}% from last test`;
+            document.getElementById('pingTrend').textContent = 
+                `${pingTrend}${Math.floor(Math.random() * 10)}% from last test`;
+            document.getElementById('jitterTrend').textContent = 
+                `${jitterTrend}${Math.floor(Math.random() * 5)}% from last test`;
+        }
+
+        // Add New Service
+        function addNewService() {
+            currentServiceId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Service';
+            
+            // Reset form
+            document.getElementById('serviceForm').reset();
+            
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            const nextMonthStr = nextMonth.toISOString().split('T')[0];
+            
+            document.getElementById('serviceStartDate').value = today;
+            document.getElementById('serviceEndDate').value = nextMonthStr;
+            
+            // Populate plans dropdown
+            populatePlansDropdown();
+            
+            // Show modal
+            document.getElementById('serviceModal').style.display = 'block';
+        }
+
+        // Populate Plans Dropdown
+        function populatePlansDropdown() {
+            const planSelect = document.getElementById('servicePlan');
+            planSelect.innerHTML = '<option value="">Select plan</option>';
+            
+            plans.forEach(plan => {
+                const option = document.createElement('option');
+                option.value = plan.id;
+                option.textContent = `${plan.name} - KES ${plan.price}/${plan.billing_period}`;
+                planSelect.appendChild(option);
+            });
+        }
+
+        // Save Service
+        async function saveService() {
+            const form = document.getElementById('serviceForm');
+            
+            if (!form.checkValidity()) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const serviceData = {
+                user_id: currentUser.id,
+                name: document.getElementById('serviceName').value,
+                type: document.getElementById('serviceType').value,
+                plan_id: document.getElementById('servicePlan').value,
+                start_date: document.getElementById('serviceStartDate').value,
+                end_date: document.getElementById('serviceEndDate').value || null,
+                status: document.getElementById('serviceStatus').value,
+                notes: document.getElementById('serviceNotes').value,
+                updated_at: new Date().toISOString()
+            };
+            
+            try {
+                if (currentServiceId) {
+                    // Update existing service
+                    const { error } = await supabase
+                        .from('services')
+                        .update(serviceData)
+                        .eq('id', currentServiceId)
+                        .eq('user_id', currentUser.id);
+                    
+                    if (error) throw error;
+                    showNotification('Service updated successfully', 'success');
+                    
+                } else {
+                    // Add new service
+                    serviceData.created_at = new Date().toISOString();
+                    
+                    const { error } = await supabase
+                        .from('services')
+                        .insert([serviceData]);
+                    
+                    if (error) throw error;
+                    showNotification('Service added successfully', 'success');
+                }
+                
+                // Close modal and refresh
+                closeServiceModal();
+                await loadServicesData();
+                
+            } catch (error) {
+                console.error('❌ Error saving service:', error);
+                showNotification('Failed to save service', 'error');
+            }
+        }
+
+        // Close Service Modal
+        function closeServiceModal() {
+            document.getElementById('serviceModal').style.display = 'none';
+        }
+
+        // Manage Service
+        async function manageService(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (!service) return;
+            
+            currentServiceId = serviceId;
+            document.getElementById('modalTitle').textContent = 'Manage Service';
+            
+            // Populate form
+            document.getElementById('serviceName').value = service.name;
+            document.getElementById('serviceType').value = service.type;
+            document.getElementById('servicePlan').value = service.plan_id;
+            document.getElementById('serviceStartDate').value = service.start_date?.split('T')[0] || '';
+            document.getElementById('serviceEndDate').value = service.end_date?.split('T')[0] || '';
+            document.getElementById('serviceStatus').value = service.status;
+            document.getElementById('serviceNotes').value = service.notes || '';
+            
+            // Populate plans
+            populatePlansDropdown();
+            
+            // Show modal
+            document.getElementById('serviceModal').style.display = 'block';
+        }
+
+        // View Service Details
+        function viewServiceDetails(serviceId) {
+            showNotification(`Viewing service ${serviceId} details`, 'info');
+            // In production, this would open a detailed view
+        }
+
+        // View Plan Details
+        function viewPlanDetails(planId) {
+            const plan = plans.find(p => p.id === planId);
+            if (!plan) return;
+            
+            const details = `
+                <h3>${plan.name}</h3>
+                <p>Price: KES ${plan.price}/${plan.billing_period}</p>
+                <p>${plan.description}</p>
+                <h4>Features:</h4>
+                <ul>
+                    ${plan.features ? JSON.parse(plan.features).map(f => `<li>${f}</li>`).join('') : '<li>No features listed</li>'}
+                </ul>
+                <h4>Limitations:</h4>
+                <ul>
+                    ${plan.limitations ? JSON.parse(plan.limitations).map(l => `<li>${l}</li>`).join('') : '<li>No limitations listed</li>'}
+                </ul>
+            `;
+            
+            alert(details);
+        }
+
+        // Subscribe to Plan
+        async function subscribeToPlan(planId) {
+            const plan = plans.find(p => p.id === planId);
+            if (!plan) return;
+            
+            if (confirm(`Subscribe to ${plan.name} for KES ${plan.price}/${plan.billing_period}?`)) {
+                showNotification(`Subscribing to ${plan.name}...`, 'info');
+                
+                // In production, this would redirect to payment page
+                setTimeout(() => {
+                    window.location.href = `billing.html?subscribe=${planId}`;
+                }, 1000);
+            }
+        }
+
+        // Manage Device
+        function manageDevice(deviceId) {
+            showNotification(`Managing device ${deviceId}`, 'info');
+        }
+
+        // Disconnect Device
+        async function disconnectDevice(deviceId) {
+            if (confirm('Are you sure you want to disconnect this device?')) {
+                try {
+                    const { error } = await supabase
+                        .from('connected_devices')
+                        .update({ is_online: false, last_seen: new Date().toISOString() })
+                        .eq('id', deviceId)
+                        .eq('user_id', currentUser.id);
+                    
+                    if (error) throw error;
+                    
+                    showNotification('Device disconnected', 'success');
+                    await loadConnectedDevices();
+                    
+                } catch (error) {
+                    console.error('❌ Error disconnecting device:', error);
+                    showNotification('Failed to disconnect device', 'error');
+                }
+            }
+        }
+
+        // Manage Equipment
+        function manageEquipment(equipmentId) {
+            showNotification(`Managing equipment ${equipmentId}`, 'info');
+        }
+
+        // Reboot Equipment
+        async function rebootEquipment(equipmentId) {
+            if (confirm('Reboot this equipment? It may take a few minutes to come back online.')) {
+                showNotification('Rebooting equipment...', 'info');
+                
+                // Simulate reboot
+                setTimeout(async () => {
+                    try {
+                        const { error } = await supabase
+                            .from('equipment')
+                            .update({ 
+                                status: 'online',
+                                last_reboot: new Date().toISOString() 
+                            })
+                            .eq('id', equipmentId)
+                            .eq('user_id', currentUser.id);
+                        
+                        if (error) throw error;
+                        
+                        showNotification('Equipment rebooted successfully', 'success');
+                        await loadEquipment();
+                        
+                    } catch (error) {
+                        console.error('❌ Error rebooting equipment:', error);
+                        showNotification('Failed to reboot equipment', 'error');
+                    }
+                }, 2000);
+            }
+        }
+
+        // View Equipment Logs
+        function viewEquipmentLogs(equipmentId) {
+            showNotification(`Viewing logs for equipment ${equipmentId}`, 'info');
+        }
+
+        // View History Details
+        function viewHistoryDetails(historyId) {
+            showNotification(`Viewing history details ${historyId}`, 'info');
+        }
+
+        // Repeat Action
+        function repeatAction(historyId) {
+            const history = serviceHistory.find(h => h.id === historyId);
+            if (history) {
+                showNotification(`Repeating action: ${history.action}`, 'info');
+            }
+        }
+
+        // View Speed Test Details
+        function viewSpeedTestDetails(testId) {
+            const test = speedTestHistory.find(t => t.id === testId);
+            if (test) {
+                const details = `
+                    <h3>Speed Test Details</h3>
+                    <p>Date: ${formatDateTime(test.created_at)}</p>
+                    <p>Download: ${test.download_speed} Mbps</p>
+                    <p>Upload: ${test.upload_speed} Mbps</p>
+                    <p>Ping: ${test.ping} ms</p>
+                    <p>Jitter: ${test.jitter || 'N/A'} ms</p>
+                    <p>Server: ${test.server || 'Auto'}</p>
+                `;
+                alert(details);
+            }
+        }
+
+        // Filter Plans
+        function filterPlans() {
+            const filter = document.getElementById('planFilter').value;
+            const planCards = document.querySelectorAll('.cs-plan-card');
+            
+            planCards.forEach(card => {
+                const planName = card.querySelector('h3').textContent.toLowerCase();
+                if (filter === 'all' || planName.includes(filter)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // View All Services
+        function viewAllServices() {
+            showNotification('Loading all services...', 'info');
+        }
+
+        // Refresh Services
+        function refreshServices() {
+            location.reload();
+        }
+
+        // Add Equipment
+        function addEquipment() {
+            showNotification('Add equipment functionality coming soon', 'info');
+        }
+
+        // Manage Devices
+        function manageDevices() {
+            showNotification('Device management panel coming soon', 'info');
+        }
+
+        // Export Service History
+        function exportServiceHistory() {
+            showNotification('Exporting service history...', 'info');
+        }
+
+        // Helper Functions
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        function formatData(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds) return '0s';
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            } else {
+                return `${secs}s`;
+            }
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return `${diffMins} minutes`;
+            if (diffHours < 24) return `${diffHours} hours`;
+            return `${diffDays} days`;
+        }
+
+        // Sample Data Functions
+        function getSampleServices() {
+            return [
+                {
+                    id: '1',
+                    name: 'Premium Internet',
+                    type: 'internet',
+                    plan_name: 'Premium 100Mbps',
+                    price: 4000,
+                    status: 'active',
+                    description: 'Unlimited High-Speed Internet',
+                    usage_percentage: 65,
+                    data_used: 650000000000, // 650 GB in bytes
+                    data_limit: 1000000000000, // 1 TB in bytes
+                    next_billing_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+        }
+
+        function getSamplePlans() {
+            return [
+                {
+                    id: '1',
+                    name: 'Basic',
+                    price: 1500,
+                    billing_period: 'month',
+                    description: 'Perfect for light browsing and email',
+                    is_featured: false,
+                    features: JSON.stringify(['25 Mbps Speed', '100 GB Data', '5 Devices', 'Basic Support'])
+                },
+                {
+                    id: '2',
+                    name: 'Standard',
+                    price: 2500,
+                    billing_period: 'month',
+                    description: 'Great for streaming and gaming',
+                    is_featured: true,
+                    features: JSON.stringify(['50 Mbps Speed', '250 GB Data', '10 Devices', 'Priority Support', 'Free Router'])
+                },
+                {
+                    id: '3',
+                    name: 'Premium',
+                    price: 4000,
+                    billing_period: 'month',
+                    description: 'Ultimate performance for power users',
+                    is_featured: false,
+                    features: JSON.stringify(['100 Mbps Speed', 'Unlimited Data', '20 Devices', '24/7 Priority Support', 'Advanced Security'])
+                }
+            ];
+        }
+
+        function getSampleDevices() {
+            return [
+                {
+                    id: '1',
+                    name: 'iPhone 13',
+                    type: 'mobile',
+                    mac_address: 'AA:BB:CC:DD:EE:FF',
+                    ip_address: '192.168.1.101',
+                    vendor: 'Apple',
+                    is_online: true,
+                    connection_duration: 7200, // 2 hours in seconds
+                    data_used: 500000000 // 500 MB in bytes
+                },
+                {
+                    id: '2',
+                    name: 'MacBook Pro',
+                    type: 'laptop',
+                    mac_address: '11:22:33:44:55:66',
+                    ip_address: '192.168.1.102',
+                    vendor: 'Apple',
+                    is_online: true,
+                    connection_duration: 14400, // 4 hours in seconds
+                    data_used: 2000000000 // 2 GB in bytes
+                }
+            ];
+        }
+
+        function getSampleEquipment() {
+            return [
+                {
+                    id: '1',
+                    name: 'TP-Link Archer C7',
+                    type: 'router',
+                    model: 'Archer C7',
+                    serial_number: 'TP-AC7-123456',
+                    mac_address: 'AA:BB:CC:DD:EE:FF',
+                    ip_address: '192.168.1.1',
+                    status: 'online',
+                    purchase_date: new Date('2023-06-01').toISOString()
+                },
+                {
+                    id: '2',
+                    name: 'Ubiquiti LiteBeam',
+                    type: 'antenna',
+                    model: 'LiteBeam AC',
+                    serial_number: 'UBLB-789012',
+                    mac_address: '11:22:33:44:55:66',
+                    ip_address: '192.168.1.2',
+                    status: 'online',
+                    purchase_date: new Date('2023-07-15').toISOString()
+                }
+            ];
+        }
+
+        function getSampleServiceHistory() {
+            return [
+                {
+                    id: '1',
+                    service_name: 'Premium Internet',
+                    action: 'Service Activated',
+                    status: 'completed',
+                    details: 'Premium 100Mbps plan activated',
+                    created_at: new Date('2024-01-15').toISOString()
+                },
+                {
+                    id: '2',
+                    service_name: 'Premium Internet',
+                    action: 'Monthly Payment',
+                    status: 'completed',
+                    details: 'KES 4,000 paid via M-Pesa',
+                    created_at: new Date('2024-01-10').toISOString()
+                },
+                {
+                    id: '3',
+                    service_name: 'Router',
+                    action: 'Configuration Update',
+                    status: 'completed',
+                    details: 'WiFi settings updated',
+                    created_at: new Date('2024-01-05').toISOString()
+                }
+            ];
+        }
+
+        function getSampleSpeedTestHistory() {
+            return [
+                {
+                    id: '1',
+                    download_speed: 85.2,
+                    upload_speed: 22.4,
+                    ping: 24,
+                    jitter: 3,
+                    server: 'nairobi',
+                    created_at: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+                },
+                {
+                    id: '2',
+                    download_speed: 78.6,
+                    upload_speed: 20.1,
+                    ping: 28,
+                    jitter: 5,
+                    server: 'nairobi',
+                    created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+                }
+            ];
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            // Create notification center if it doesn't exist
+            let notificationCenter = document.getElementById('notificationCenter');
+            if (!notificationCenter) {
+                notificationCenter = document.createElement('div');
+                notificationCenter.id = 'notificationCenter';
+                notificationCenter.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                `;
+                document.body.appendChild(notificationCenter);
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                padding: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+            `;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon}" style="color: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'}"></i>
+                <div style="flex: 1;">
+                    <p style="margin: 0; font-weight: 600;">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #6B7280; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationCenter.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.innerHTML = `
+                <div class="cs-loading-content">
+                    <div style="color: #EF4444; font-size: 3rem; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2>Services Error</h2>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #0066FF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Refresh Page
+                    </button>
+                </div>
+            `;
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Close modal when clicking outside
+            document.getElementById('serviceModal').addEventListener('click', (e) => {
+                if (e.target.id === 'serviceModal') {
+                    closeServiceModal();
+                }
+            });
+        }
+
+        // Handle Logout
+        async function handleLogout(e) {
             e.preventDefault();
-            localStorage.removeItem('cs_session');
-            window.location.href = 'index.html';
-        });
+            
+            try {
+                await supabase.auth.signOut();
+                localStorage.removeItem('cs_session');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showNotification('Logout failed. Please try again.', 'error');
+            }
+        }
     </script>
 
     <style>
-        /* Services Page Specific Styles */
-        .cs-services-page-header {
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .cs-services-page-header h1 {
-            display: flex;
+        /* Modal Styles */
+        .cs-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
             align-items: center;
-            gap: var(--space-sm);
-            font-size: 2.2rem;
-            margin-bottom: var(--space-sm);
+            justify-content: center;
         }
         
-        .cs-active-services,
-        .cs-available-plans,
-        .cs-hardware-section,
-        .cs-speed-test-section,
-        .cs-service-history {
-            margin-bottom: var(--space-2xl);
+        .cs-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
         }
         
-        .cs-active-services h2,
-        .cs-available-plans h2,
-        .cs-hardware-section h2,
-        .cs-speed-test-section h2,
-        .cs-service-history h2 {
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cs-modal-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-xl);
-            color: var(--dark);
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
         }
         
-        /* Service Plans */
-        .cs-service-plans {
+        .cs-modal-header h3 {
+            margin: 0;
+            color: #1F2937;
+        }
+        
+        .cs-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6B7280;
+        }
+        
+        .cs-modal-body {
+            padding: 24px;
+        }
+        
+        .cs-modal-footer {
+            padding: 24px;
+            border-top: 1px solid #E5E7EB;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        /* Form Styles */
+        .cs-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .cs-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-form-group input,
+        .cs-form-group select,
+        .cs-form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .cs-form-group input:focus,
+        .cs-form-group select:focus,
+        .cs-form-group textarea:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-form-row {
             display: grid;
-            gap: var(--space-lg);
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
         
-        .cs-service-plan {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow);
-            border: 2px solid var(--gray-200);
+        @media (max-width: 768px) {
+            .cs-form-row {
+                grid-template-columns: 1fr;
+            }
         }
         
-        .cs-service-plan.active {
-            border-color: var(--primary);
+        /* Section Styles */
+        .cs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
         
-        .cs-plan-header {
+        .cs-section-header h2 {
             display: flex;
             align-items: center;
-            gap: var(--space-lg);
-            margin-bottom: var(--space-xl);
+            gap: 10px;
+            margin: 0;
+            color: #1F2937;
         }
         
-        .cs-plan-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--primary-light);
-            border-radius: var(--radius);
+        /* Services Grid */
+        .cs-services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .cs-services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .cs-service-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s;
+        }
+        
+        .cs-service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .cs-service-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .cs-service-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #0066FF;
             font-size: 1.5rem;
-            color: var(--primary);
         }
         
-        .cs-plan-info h3 {
-            font-size: 1.3rem;
-            margin-bottom: var(--space-xs);
-            color: var(--dark);
+        .cs-service-info h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #1F2937;
         }
         
-        .cs-plan-info p {
-            color: var(--gray-600);
-        }
-        
-        .cs-plan-status {
-            margin-left: auto;
-            padding: var(--space-xs) var(--space-md);
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border-radius: var(--radius-full);
+        .cs-service-info p {
+            margin: 5px 0 0;
+            color: #6B7280;
             font-size: 0.9rem;
+        }
+        
+        .cs-service-status {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: 500;
         }
         
-        .cs-plan-details {
+        .cs-service-status.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .cs-service-status.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .cs-service-status.suspended {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        
+        .cs-service-status.cancelled {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6B7280;
+        }
+        
+        .cs-service-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-md);
-            margin-bottom: var(--space-xl);
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
-        .cs-plan-feature {
+        .cs-detail-item {
             display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            color: var(--gray-700);
+            flex-direction: column;
         }
         
-        .cs-plan-feature i {
-            color: var(--primary);
+        .cs-detail-label {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin-bottom: 4px;
         }
         
-        .cs-plan-usage {
-            margin-bottom: var(--space-xl);
+        .cs-detail-value {
+            font-weight: 500;
+            color: #1F2937;
+        }
+        
+        .cs-service-usage {
+            margin-bottom: 20px;
         }
         
         .cs-usage-bar {
-            height: 8px;
-            background: var(--gray-200);
-            border-radius: var(--radius-full);
-            margin-bottom: var(--space-sm);
+            height: 6px;
+            background: #E5E7EB;
+            border-radius: 3px;
+            margin-bottom: 8px;
             overflow: hidden;
         }
         
         .cs-usage-fill {
             height: 100%;
-            background: var(--primary);
-            border-radius: var(--radius-full);
+            background: #0066FF;
+            border-radius: 3px;
         }
         
         .cs-usage-text {
             display: flex;
             justify-content: space-between;
-            font-size: 0.9rem;
-            color: var(--gray-600);
+            font-size: 0.85rem;
+            color: #6B7280;
         }
         
-        .cs-plan-actions {
+        .cs-service-actions {
             display: flex;
-            gap: var(--space-md);
+            gap: 10px;
         }
         
-        .cs-plan-btn {
+        .cs-service-btn {
             flex: 1;
-            padding: var(--space-md);
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius);
-            background: var(--white);
-            color: var(--dark);
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-sm);
+            gap: 8px;
         }
         
-        .cs-plan-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
+        .cs-service-btn:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
         }
         
-        .cs-plan-btn.primary {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
+        .cs-service-btn.primary {
+            background: #0066FF;
+            color: white;
+            border-color: #0066FF;
         }
         
-        .cs-plan-btn.primary:hover {
-            background: var(--primary-dark);
+        .cs-service-btn.primary:hover {
+            background: #0052D4;
         }
         
-        /* Available Plans */
+        /* No Services State */
+        .cs-no-services {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .cs-no-services i {
+            font-size: 4rem;
+            color: #D1D5DB;
+            margin-bottom: 20px;
+        }
+        
+        .cs-no-services h3 {
+            margin: 0 0 10px;
+            color: #374151;
+        }
+        
+        .cs-no-services p {
+            color: #6B7280;
+            margin-bottom: 20px;
+        }
+        
+        /* Plans Grid */
         .cs-plans-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-xl);
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .cs-plans-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .cs-plan-card {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow);
-            border: 2px solid var(--gray-200);
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 2px solid #E5E7EB;
             position: relative;
             transition: all 0.3s;
         }
         
         .cs-plan-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
         
         .cs-plan-card.featured {
-            border-color: var(--primary);
+            border-color: #0066FF;
         }
         
         .cs-plan-badge {
@@ -677,318 +2201,663 @@
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--primary);
-            color: var(--white);
-            padding: var(--space-xs) var(--space-lg);
-            border-radius: var(--radius-full);
+            background: #0066FF;
+            color: white;
+            padding: 6px 20px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
         }
         
-        .cs-plan-card-header {
+        .cs-plan-header {
             text-align: center;
-            margin-bottom: var(--space-xl);
+            margin-bottom: 25px;
         }
         
-        .cs-plan-card-header h3 {
+        .cs-plan-header h3 {
+            margin: 0 0 10px;
             font-size: 1.5rem;
-            margin-bottom: var(--space-sm);
-            color: var(--dark);
+            color: #1F2937;
         }
         
         .cs-plan-price {
             display: flex;
             align-items: baseline;
             justify-content: center;
-            gap: var(--space-xs);
+            gap: 5px;
+            margin-bottom: 10px;
         }
         
         .cs-price {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--dark);
+            color: #1F2937;
         }
         
         .cs-period {
-            color: var(--gray-600);
+            color: #6B7280;
+        }
+        
+        .cs-plan-desc {
+            color: #6B7280;
+            margin: 0;
         }
         
         .cs-plan-features {
-            margin-bottom: var(--space-xl);
+            margin-bottom: 25px;
         }
         
         .cs-plan-feature {
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
-            padding: var(--space-sm) 0;
-            color: var(--gray-700);
+            gap: 10px;
+            padding: 10px 0;
+            color: #374151;
         }
         
         .cs-plan-feature i {
-            color: var(--success);
+            color: #10B981;
         }
         
-        .cs-plan-feature.disabled i {
-            color: var(--gray-400);
+        .cs-plan-actions {
+            display: flex;
+            gap: 10px;
         }
         
-        .cs-plan-feature.disabled span {
-            color: var(--gray-400);
-            text-decoration: line-through;
-        }
-        
-        .cs-subscribe-btn {
-            width: 100%;
-            padding: var(--space-lg);
-            background: var(--gray-100);
-            border: 2px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--dark);
-            font-weight: 600;
+        .cs-plan-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .cs-subscribe-btn:hover {
-            background: var(--primary-light);
-            border-color: var(--primary);
+        .cs-plan-btn:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
         }
         
-        .cs-subscribe-btn.primary {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
+        .cs-plan-btn.primary {
+            background: #0066FF;
+            color: white;
+            border-color: #0066FF;
         }
         
-        .cs-subscribe-btn.primary:hover {
-            background: var(--primary-dark);
+        .cs-plan-btn.primary:hover {
+            background: #0052D4;
         }
         
-        /* Hardware Section */
+        /* Devices List */
+        .cs-devices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .cs-device-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+        
+        .cs-device-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0066FF;
+            font-size: 1.5rem;
+        }
+        
+        .cs-device-info {
+            flex: 1;
+        }
+        
+        .cs-device-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .cs-device-header h4 {
+            margin: 0;
+            color: #1F2937;
+        }
+        
+        .cs-device-status {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .cs-device-status.online {
+            color: #10B981;
+        }
+        
+        .cs-device-status.offline {
+            color: #EF4444;
+        }
+        
+        .cs-device-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+        
+        .cs-device-usage {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: #9CA3AF;
+        }
+        
+        .cs-device-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cs-device-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cs-device-btn:hover {
+            background: #F9FAFB;
+        }
+        
+        .cs-device-btn.danger {
+            color: #EF4444;
+            border-color: #FCA5A5;
+        }
+        
+        .cs-device-btn.danger:hover {
+            background: #FEE2E2;
+        }
+        
+        /* Equipment Grid */
         .cs-hardware-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-lg);
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
         }
         
-        .cs-hardware-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl);
+        @media (max-width: 768px) {
+            .cs-hardware-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .cs-equipment-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+        
+        .cs-equipment-header {
             display: flex;
             align-items: center;
-            gap: var(--space-lg);
-            box-shadow: var(--shadow);
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
-        .cs-hardware-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--primary-light);
-            border-radius: var(--radius);
+        .cs-equipment-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #0066FF;
             font-size: 1.5rem;
-            color: var(--primary);
         }
         
-        .cs-hardware-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-xs);
-            color: var(--dark);
+        .cs-equipment-info h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #1F2937;
         }
         
-        .cs-hardware-info p {
-            color: var(--gray-600);
-            font-size: 0.9rem;
-            margin-bottom: var(--space-xs);
-        }
-        
-        .cs-hardware-status {
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
+        .cs-equipment-info p {
+            margin: 5px 0 0;
+            color: #6B7280;
             font-size: 0.9rem;
         }
         
-        .cs-hardware-status i.online {
-            color: var(--success);
-        }
-        
-        .cs-hardware-status i.offline {
-            color: var(--danger);
-        }
-        
-        .cs-hardware-btn {
+        .cs-equipment-status {
             margin-left: auto;
-            padding: var(--space-sm);
-            background: var(--gray-100);
-            border: none;
-            border-radius: var(--radius);
-            color: var(--gray-600);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .cs-equipment-status.online {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .cs-equipment-status.offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        
+        .cs-equipment-status.maintenance {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .cs-equipment-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .cs-equipment-details .cs-detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .cs-equipment-details .cs-detail-item span:first-child {
+            color: #6B7280;
+        }
+        
+        .cs-equipment-details .cs-detail-item span:last-child {
+            font-weight: 500;
+            color: #1F2937;
+        }
+        
+        .cs-equipment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cs-equipment-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .cs-hardware-btn:hover {
-            background: var(--primary-light);
-            color: var(--primary);
+        .cs-equipment-btn:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
         }
         
-        /* Speed Test */
-        .cs-speed-test-card {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-2xl);
-            box-shadow: var(--shadow);
+        /* Speed Test Panel */
+        .cs-speed-test-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
         }
         
-        .cs-speed-test-header {
-            text-align: center;
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .cs-speed-test-header h3 {
-            font-size: 1.5rem;
-            margin-bottom: var(--space-sm);
-            color: var(--dark);
-        }
-        
-        .cs-speed-results {
+        .cs-speed-test-results {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-xl);
-            margin-bottom: var(--space-2xl);
+            gap: 30px;
+            margin-bottom: 30px;
         }
         
-        .cs-speed-result {
+        .cs-speed-metric {
             text-align: center;
         }
         
-        .cs-speed-icon {
-            width: 70px;
-            height: 70px;
-            background: var(--primary-light);
-            border-radius: 50%;
+        .cs-metric-header {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto var(--space-md);
-            font-size: 1.8rem;
-            color: var(--primary);
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
-        .cs-speed-label {
-            display: block;
-            color: var(--gray-600);
-            margin-bottom: var(--space-xs);
+        .cs-metric-header i {
+            font-size: 1.5rem;
+            color: #0066FF;
         }
         
-        .cs-speed-value {
-            display: block;
-            font-size: 1.8rem;
+        .cs-metric-header h4 {
+            margin: 0;
+            color: #374151;
+        }
+        
+        .cs-metric-value {
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--dark);
+            color: #1F2937;
+            margin-bottom: 10px;
         }
         
-        .cs-speed-test-btn {
-            width: 100%;
-            padding: var(--space-lg);
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: var(--radius);
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
+        .cs-metric-trend {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-sm);
-            transition: all 0.2s;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: #6B7280;
         }
         
-        .cs-speed-test-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
+        .cs-metric-trend i {
+            color: #10B981;
         }
         
+        .cs-speed-test-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #F9FAFB;
+            border-radius: 8px;
+        }
+        
+        .cs-test-server {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cs-test-server label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-test-server select {
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+        }
+        
+        .cs-test-options {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .cs-test-options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #374151;
+            cursor: pointer;
+        }
+        
+        .cs-test-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Progress Bar */
         .cs-speed-test-progress {
-            margin-top: var(--space-xl);
-            text-align: center;
+            margin: 30px 0;
         }
         
         .cs-progress-bar {
             height: 8px;
-            background: var(--gray-200);
-            border-radius: var(--radius-full);
-            margin-bottom: var(--space-md);
+            background: #E5E7EB;
+            border-radius: 4px;
             overflow: hidden;
         }
         
         .cs-progress-fill {
             height: 100%;
-            background: var(--primary);
-            border-radius: var(--radius-full);
+            background: #0066FF;
+            border-radius: 4px;
             width: 0%;
             transition: width 0.3s;
         }
         
-        .cs-test-complete {
-            color: var(--success);
+        .cs-progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+        
+        /* Test History */
+        .cs-test-history {
+            margin-top: 30px;
+        }
+        
+        .cs-test-history h4 {
+            margin: 0 0 15px;
+            color: #374151;
+        }
+        
+        .cs-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .cs-history-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            background: #F9FAFB;
+            border-radius: 8px;
+        }
+        
+        .cs-history-time {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cs-history-time span:first-child {
             font-weight: 500;
+            color: #374151;
         }
         
-        .cs-test-complete i {
-            font-size: 2rem;
-            margin-bottom: var(--space-sm);
+        .cs-history-time span:last-child {
+            font-size: 0.85rem;
+            color: #6B7280;
         }
         
-        /* Service History */
-        .cs-history-table {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow);
-            overflow-x: auto;
+        .cs-history-speed,
+        .cs-history-ping {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
         }
         
-        .cs-history-table table {
+        .cs-history-speed span:first-child,
+        .cs-history-ping span:first-child {
+            font-weight: 600;
+            color: #1F2937;
+        }
+        
+        .cs-history-speed span:last-child,
+        .cs-history-ping span:last-child {
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+        
+        .cs-history-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cs-history-btn:hover {
+            background: #F9FAFB;
+        }
+        
+        /* Service History Table */
+        .cs-service-history-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+        
+        .cs-service-history-table table {
             width: 100%;
             border-collapse: collapse;
         }
         
-        .cs-history-table th {
+        .cs-service-history-table th {
             text-align: left;
-            padding: var(--space-md);
-            border-bottom: 2px solid var(--gray-200);
-            color: var(--gray-700);
+            padding: 15px;
+            background: #F9FAFB;
+            border-bottom: 2px solid #E5E7EB;
+            color: #374151;
             font-weight: 600;
         }
         
-        .cs-history-table td {
-            padding: var(--space-md);
-            border-bottom: 1px solid var(--gray-100);
-            color: var(--gray-600);
+        .cs-service-history-table td {
+            padding: 15px;
+            border-bottom: 1px solid #F3F4F6;
+            color: #4B5563;
         }
         
         .cs-history-status {
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-full);
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
         }
         
-        .cs-history-status.completed,
-        .cs-history-status.paid,
-        .cs-history-status.resolved,
-        .cs-history-status.delivered {
+        .cs-history-status.completed {
             background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
+            color: #10B981;
+        }
+        
+        .cs-history-status.failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        
+        .cs-history-status.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .cs-history-status.cancelled {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6B7280;
+        }
+        
+        .cs-table-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+        }
+        
+        .cs-table-btn:hover {
+            background: #F9FAFB;
+        }
+        
+        /* Button Styles */
+        .cs-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .cs-btn-primary {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .cs-btn-primary:hover {
+            background: #0052D4;
+        }
+        
+        .cs-btn-outline {
+            background: white;
+            color: #0066FF;
+            border: 2px solid #0066FF;
+        }
+        
+        .cs-btn-outline:hover {
+            background: #0066FF;
+            color: white;
+        }
+        
+        /* Loading Spinner */
+        .cs-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #0066FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </body>
-</html>
+    </html>
