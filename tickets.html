@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - ConnectSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="cs-loading-screen">
+        <div class="cs-loading-content">
+            <div class="cs-loading-spinner"></div>
+            <h2>ConnectSphere Portal</h2>
+            <p>Loading Support...</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Navigation -->
+        <nav class="cs-navbar">
+            <div class="cs-navbar-brand">
+                <div class="cs-brand-logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="cs-brand-text">
+                    <h2>ConnectSphere</h2>
+                    <p>Enterprise WiFi</p>
+                </div>
+            </div>
+            
+            <div class="cs-navbar-menu">
+                <a href="index.html" class="cs-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Portal</span>
+                </a>
+                <a href="dashboard.html" class="cs-nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="services.html" class="cs-nav-item">
+                    <i class="fas fa-wifi"></i>
+                    <span>Services</span>
+                </a>
+                <a href="billing.html" class="cs-nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Billing</span>
+                </a>
+                <a href="tickets.html" class="cs-nav-item active">
+                    <i class="fas fa-headset"></i>
+                    <span>Support</span>
+                    <span class="cs-notification-badge" id="supportBadge">0</span>
+                </a>
+                
+                <div class="cs-user-menu">
+                    <div class="cs-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="cs-user-info">
+                        <span id="navUserName">Loading...</span>
+                        <span class="cs-user-role">Premium User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="cs-dropdown-menu">
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="cs-divider"></div>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="cs-main-content">
+            <div class="cs-container">
+                <!-- Support Header -->
+                <div class="cs-dashboard-header">
+                    <div class="cs-header-content">
+                        <h1><i class="fas fa-headset"></i> Support Center</h1>
+                        <p>Get help with your services, report issues, and track your tickets</p>
+                    </div>
+                    <div class="cs-header-actions">
+                        <button class="cs-btn cs-btn-primary" onclick="createNewTicket()">
+                            <i class="fas fa-plus"></i> New Ticket
+                        </button>
+                        <button class="cs-btn cs-btn-outline" onclick="refreshTickets()">
+                            <i class="fas fa-redo"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="cs-stats-grid">
+                    <div class="cs-stat-card primary">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="openTickets">0</span>
+                                <span class="cs-stat-trend up">Open</span>
+                            </div>
+                            <p class="cs-stat-label">Active Tickets</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-clock"></i> <span id="avgResponseTime">--</span> avg response
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card success">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="resolvedTickets">0</span>
+                                <span class="cs-stat-trend up">Resolved</span>
+                            </div>
+                            <p class="cs-stat-label">Closed Tickets</p>
+                            <div class="cs-stat-subtext">
+                                Last 30 days
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card warning">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="pendingTickets">0</span>
+                                <span class="cs-stat-trend stable">Pending</span>
+                            </div>
+                            <p class="cs-stat-label">Awaiting Response</p>
+                            <div class="cs-stat-subtext">
+                                <span id="oldestPending">--</span> oldest
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card info">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="satisfactionRate">100%</span>
+                                <span class="cs-stat-trend up">Satisfied</span>
+                            </div>
+                            <p class="cs-stat-label">Satisfaction Rate</p>
+                            <div class="cs-stat-subtext">
+                                Based on recent resolutions
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Help -->
+                <div class="cs-quick-help-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-question-circle"></i> Quick Help</h2>
+                        <button class="cs-btn cs-btn-outline" onclick="viewKnowledgeBase()">
+                            <i class="fas fa-book"></i> Knowledge Base
+                        </button>
+                    </div>
+                    
+                    <div class="cs-help-categories">
+                        <div class="cs-help-category" onclick="showHelpCategory('internet')">
+                            <div class="cs-category-icon">
+                                <i class="fas fa-wifi"></i>
+                            </div>
+                            <div class="cs-category-content">
+                                <h3>Internet Issues</h3>
+                                <p>Slow speeds, connection drops, no internet</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-category-arrow"></i>
+                        </div>
+                        
+                        <div class="cs-help-category" onclick="showHelpCategory('billing')">
+                            <div class="cs-category-icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="cs-category-content">
+                                <h3>Billing Questions</h3>
+                                <p>Payments, invoices, subscriptions</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-category-arrow"></i>
+                        </div>
+                        
+                        <div class="cs-help-category" onclick="showHelpCategory('hardware')">
+                            <div class="cs-category-icon">
+                                <i class="fas fa-hdd"></i>
+                            </div>
+                            <div class="cs-category-content">
+                                <h3>Hardware Problems</h3>
+                                <p>Router issues, equipment setup</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-category-arrow"></i>
+                        </div>
+                        
+                        <div class="cs-help-category" onclick="showHelpCategory('account')">
+                            <div class="cs-category-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <div class="cs-category-content">
+                                <h3>Account Management</h3>
+                                <p>Profile updates, password reset</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-category-arrow"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Tickets -->
+                <div class="cs-active-tickets-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-inbox"></i> My Tickets</h2>
+                        <div class="cs-ticket-filter">
+                            <select id="ticketFilter" onchange="filterTickets()">
+                                <option value="all">All Tickets</option>
+                                <option value="open">Open</option>
+                                <option value="pending">Pending</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            <select id="ticketSort" onchange="sortTickets()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="priority">Priority</option>
+                                <option value="status">Status</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-tickets-list" id="ticketsList">
+                        <!-- Tickets will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Ticket Details Panel -->
+                <div class="cs-ticket-details-section" id="ticketDetails" style="display: none;">
+                    <div class="cs-ticket-details-header">
+                        <button class="cs-back-btn" onclick="hideTicketDetails()">
+                            <i class="fas fa-arrow-left"></i> Back to Tickets
+                        </button>
+                        <div class="cs-ticket-actions">
+                            <button class="cs-btn cs-btn-outline" id="replyBtn" onclick="replyToTicket()">
+                                <i class="fas fa-reply"></i> Reply
+                            </button>
+                            <button class="cs-btn cs-btn-primary" id="closeBtn" onclick="closeTicket()">
+                                <i class="fas fa-check"></i> Mark Resolved
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-ticket-details-content">
+                        <div class="cs-ticket-main-info">
+                            <div class="cs-ticket-title-section">
+                                <h2 id="ticketTitle">Loading...</h2>
+                                <div class="cs-ticket-meta">
+                                    <span class="cs-ticket-id" id="ticketId">#--</span>
+                                    <span class="cs-ticket-status" id="ticketStatus">--</span>
+                                    <span class="cs-ticket-priority" id="ticketPriority">--</span>
+                                    <span class="cs-ticket-date" id="ticketDate">--</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-ticket-description">
+                                <h3>Description</h3>
+                                <p id="ticketDescription">Loading...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-ticket-conversation">
+                            <h3>Conversation</h3>
+                            <div class="cs-conversation-thread" id="conversationThread">
+                                <!-- Conversation messages will be loaded here -->
+                            </div>
+                            
+                            <div class="cs-reply-section">
+                                <textarea id="replyMessage" placeholder="Type your reply here..." rows="4"></textarea>
+                                <div class="cs-reply-actions">
+                                    <div class="cs-attachment-options">
+                                        <button class="cs-attachment-btn" onclick="attachFile()">
+                                            <i class="fas fa-paperclip"></i> Attach File
+                                        </button>
+                                        <input type="file" id="fileUpload" style="display: none;">
+                                    </div>
+                                    <button class="cs-btn cs-btn-primary" onclick="sendReply()">
+                                        <i class="fas fa-paper-plane"></i> Send Reply
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Ticket Modal -->
+                <div id="createTicketModal" class="cs-modal">
+                    <div class="cs-modal-content">
+                        <div class="cs-modal-header">
+                            <h3><i class="fas fa-plus"></i> Create New Ticket</h3>
+                            <button class="cs-modal-close" onclick="closeCreateTicketModal()">&times;</button>
+                        </div>
+                        <div class="cs-modal-body">
+                            <form id="ticketForm">
+                                <div class="cs-form-group">
+                                    <label for="ticketSubject">Subject *</label>
+                                    <input type="text" id="ticketSubject" placeholder="Brief description of your issue" required>
+                                </div>
+                                
+                                <div class="cs-form-row">
+                                    <div class="cs-form-group">
+                                        <label for="ticketCategory">Category *</label>
+                                        <select id="ticketCategory" required>
+                                            <option value="">Select category</option>
+                                            <option value="internet">Internet Service</option>
+                                            <option value="billing">Billing & Payments</option>
+                                            <option value="hardware">Hardware Issues</option>
+                                            <option value="account">Account Management</option>
+                                            <option value="technical">Technical Support</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="cs-form-group">
+                                        <label for="ticketPriority">Priority *</label>
+                                        <select id="ticketPriority" required>
+                                            <option value="low">Low</option>
+                                            <option value="medium" selected>Medium</option>
+                                            <option value="high">High</option>
+                                            <option value="urgent">Urgent</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="cs-form-group">
+                                    <label for="ticketService">Related Service</label>
+                                    <select id="ticketService">
+                                        <option value="">None (General Inquiry)</option>
+                                        <!-- Services will be populated dynamically -->
+                                    </select>
+                                </div>
+                                
+                                <div class="cs-form-group">
+                                    <label for="ticketDescription">Description *</label>
+                                    <textarea id="ticketDescriptionInput" rows="6" placeholder="Please provide detailed information about your issue..." required></textarea>
+                                </div>
+                                
+                                <div class="cs-form-group">
+                                    <label for="ticketAttachments">Attachments</label>
+                                    <div class="cs-attachments-area" id="attachmentsArea">
+                                        <div class="cs-attachments-dropzone" id="attachmentsDropzone">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Drag & drop files here or click to browse</p>
+                                            <p class="cs-attachments-note">Max file size: 10MB. Supported: images, documents, logs</p>
+                                        </div>
+                                        <input type="file" id="fileInput" multiple style="display: none;">
+                                        <div class="cs-attachments-list" id="attachmentsList"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="cs-modal-footer">
+                            <button class="cs-btn cs-btn-outline" onclick="closeCreateTicketModal()">Cancel</button>
+                            <button class="cs-btn cs-btn-primary" onclick="submitTicket()">Create Ticket</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Contacts -->
+                <div class="cs-support-contacts-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-phone-alt"></i> Contact Support</h2>
+                    </div>
+                    
+                    <div class="cs-contact-methods">
+                        <div class="cs-contact-method">
+                            <div class="cs-contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="cs-contact-info">
+                                <h3>Phone Support</h3>
+                                <p>Available 24/7 for urgent issues</p>
+                                <div class="cs-contact-details">
+                                    <span>Main: 0700 123 456</span>
+                                    <span>Emergency: 0700 987 654</span>
+                                </div>
+                                <button class="cs-contact-btn" onclick="callSupport()">
+                                    <i class="fas fa-phone"></i> Call Now
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-contact-method">
+                            <div class="cs-contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="cs-contact-info">
+                                <h3>Email Support</h3>
+                                <p>Response within 2-4 business hours</p>
+                                <div class="cs-contact-details">
+                                    <span>General: support@connectsphere.co.ke</span>
+                                    <span>Billing: billing@connectsphere.co.ke</span>
+                                </div>
+                                <button class="cs-contact-btn" onclick="emailSupport()">
+                                    <i class="fas fa-envelope"></i> Send Email
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-contact-method">
+                            <div class="cs-contact-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="cs-contact-info">
+                                <h3>Live Chat</h3>
+                                <p>Available Mon-Fri, 8AM-6PM</p>
+                                <div class="cs-contact-details">
+                                    <span>Chat with our support agents</span>
+                                    <span>Typical response: &lt; 5 minutes</span>
+                                </div>
+                                <button class="cs-contact-btn primary" onclick="startLiveChat()">
+                                    <i class="fas fa-comment"></i> Start Chat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="cs-faq-section">
+                    <div class="cs-section-header">
+                        <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+                        <button class="cs-btn cs-btn-outline" onclick="viewAllFAQs()">
+                            View All FAQs
+                        </button>
+                    </div>
+                    
+                    <div class="cs-faq-list" id="faqList">
+                        <!-- FAQ items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="cs-footer">
+            <div class="cs-footer-content">
+                <div class="cs-footer-logo">
+                    <i class="fas fa-wifi"></i>
+                    <span>ConnectSphere</span>
+                </div>
+                <div class="cs-footer-links">
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Contact</a>
+                    <a href="#">Support</a>
+                    <a href="#">API</a>
+                </div>
+                <div class="cs-footer-info">
+                    <p>© 2024 ConnectSphere. All rights reserved.</p>
+                    <p class="cs-footer-version">v2.1.4 | Support Hotline: 0700 123 456</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://uadbyyaxlieemfaofode.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZGJ5eWF4bGllZW1mYW9mb2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDMyODUsImV4cCI6MjA4MTM3OTI4NX0.Gh3J0GpdQ8yXU-976JNjJKuY6rkBvn3Vkllq2vz37No';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Global Variables
+        let currentUser = null;
+        let tickets = [];
+        let currentTicket = null;
+        let attachments = [];
+
+        // Initialize Support Page
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🎫 Initializing Support Page...');
+            
+            try {
+                // Check authentication
+                await checkAuth();
+                
+                // Load all support data
+                await loadSupportData();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Hide loading screen, show app
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                
+                console.log('✅ Support page initialized successfully');
+                
+            } catch (error) {
+                console.error('❌ Support page initialization failed:', error);
+                showError('Failed to load support page. Please refresh.');
+            }
+        });
+
+        // Authentication Check
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error || !session) {
+                console.error('❌ No valid session found:', error);
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            currentUser = session.user;
+            console.log('✅ User authenticated:', currentUser.email);
+            
+            // Update user name
+            const userName = currentUser.email.split('@')[0];
+            document.getElementById('navUserName').textContent = userName;
+        }
+
+        // Load Support Data
+        async function loadSupportData() {
+            console.log('📊 Loading support data...');
+            
+            if (!currentUser) return;
+            
+            try {
+                // Load all data in parallel
+                await Promise.all([
+                    loadTickets(),
+                    loadFAQ(),
+                    updateTicketStats()
+                ]);
+                
+            } catch (error) {
+                console.error('❌ Error loading support data:', error);
+                showNotification('Failed to load support data', 'error');
+            }
+        }
+
+        // Load Tickets
+        async function loadTickets() {
+            try {
+                const { data, error } = await supabase
+                    .from('support_tickets')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.warn('⚠️ No tickets found, using sample data');
+                    tickets = getSampleTickets();
+                    return;
+                }
+                
+                tickets = data || getSampleTickets();
+                renderTickets();
+                
+            } catch (error) {
+                console.error('❌ Error loading tickets:', error);
+                tickets = getSampleTickets();
+                renderTickets();
+            }
+        }
+
+        // Load FAQ
+        async function loadFAQ() {
+            try {
+                const { data, error } = await supabase
+                    .from('faq')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('view_count', { ascending: false })
+                    .limit(6);
+                
+                if (error) {
+                    console.warn('⚠️ No FAQ found, using sample data');
+                    renderSampleFAQ();
+                    return;
+                }
+                
+                renderFAQ(data || getSampleFAQ());
+                
+            } catch (error) {
+                console.error('❌ Error loading FAQ:', error);
+                renderSampleFAQ();
+            }
+        }
+
+        // Update Ticket Statistics
+        async function updateTicketStats() {
+            const openTickets = tickets.filter(t => t.status === 'open').length;
+            const resolvedTickets = tickets.filter(t => t.status === 'resolved' || t.status === 'closed').length;
+            const pendingTickets = tickets.filter(t => t.status === 'pending').length;
+            
+            document.getElementById('openTickets').textContent = openTickets;
+            document.getElementById('resolvedTickets').textContent = resolvedTickets;
+            document.getElementById('pendingTickets').textContent = pendingTickets;
+            
+            // Update badge
+            document.getElementById('supportBadge').textContent = openTickets;
+            
+            // Calculate average response time
+            if (resolvedTickets > 0) {
+                const resolvedTicketsList = tickets.filter(t => t.status === 'resolved' || t.status === 'closed');
+                const totalResponseTime = resolvedTicketsList.reduce((sum, ticket) => {
+                    if (ticket.resolved_at && ticket.created_at) {
+                        const created = new Date(ticket.created_at);
+                        const resolved = new Date(ticket.resolved_at);
+                        return sum + (resolved - created) / (1000 * 60 * 60); // Convert to hours
+                    }
+                    return sum;
+                }, 0);
+                
+                const avgHours = Math.round(totalResponseTime / resolvedTicketsList.length);
+                document.getElementById('avgResponseTime').textContent = `${avgHours} hours`;
+            } else {
+                document.getElementById('avgResponseTime').textContent = 'No data';
+            }
+            
+            // Find oldest pending ticket
+            const pendingTicketsList = tickets.filter(t => t.status === 'pending');
+            if (pendingTicketsList.length > 0) {
+                const oldest = pendingTicketsList.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
+                const daysOld = Math.floor((new Date() - new Date(oldest.created_at)) / (1000 * 60 * 60 * 24));
+                document.getElementById('oldestPending').textContent = `${daysOld} days`;
+            } else {
+                document.getElementById('oldestPending').textContent = 'None';
+            }
+        }
+
+        // Render Tickets
+        function renderTickets() {
+            const ticketsList = document.getElementById('ticketsList');
+            ticketsList.innerHTML = '';
+            
+            if (tickets.length === 0) {
+                ticketsList.innerHTML = `
+                    <div class="cs-no-tickets">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>No Tickets Found</h3>
+                        <p>You haven't created any support tickets yet.</p>
+                        <button class="cs-btn cs-btn-primary" onclick="createNewTicket()">
+                            <i class="fas fa-plus"></i> Create Your First Ticket
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Apply filter
+            const filter = document.getElementById('ticketFilter').value;
+            const sort = document.getElementById('ticketSort').value;
+            
+            let filteredTickets = [...tickets];
+            
+            // Filter
+            if (filter !== 'all') {
+                filteredTickets = filteredTickets.filter(ticket => ticket.status === filter);
+            }
+            
+            // Sort
+            filteredTickets.sort((a, b) => {
+                switch (sort) {
+                    case 'newest':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'oldest':
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    case 'priority':
+                        const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 };
+                        return priorityOrder[b.priority] - priorityOrder[a.priority];
+                    case 'status':
+                        const statusOrder = { 'open': 4, 'pending': 3, 'resolved': 2, 'closed': 1 };
+                        return statusOrder[b.status] - statusOrder[a.status];
+                    default:
+                        return 0;
+                }
+            });
+            
+            filteredTickets.forEach(ticket => {
+                const ticketItem = document.createElement('div');
+                ticketItem.className = 'cs-ticket-item';
+                ticketItem.dataset.id = ticket.id;
+                
+                const statusClass = `status-${ticket.status}`;
+                const priorityClass = `priority-${ticket.priority}`;
+                
+                const lastUpdated = formatTimeAgo(new Date(ticket.updated_at || ticket.created_at));
+                const serviceInfo = ticket.service_name ? `<span class="cs-ticket-service">${ticket.service_name}</span>` : '';
+                
+                ticketItem.innerHTML = `
+                    <div class="cs-ticket-item-header">
+                        <div class="cs-ticket-info">
+                            <h3>${ticket.subject}</h3>
+                            <div class="cs-ticket-meta">
+                                <span class="cs-ticket-id">#${ticket.id.slice(-6)}</span>
+                                ${serviceInfo}
+                                <span class="cs-ticket-category">${ticket.category}</span>
+                                <span class="cs-ticket-date">${lastUpdated}</span>
+                            </div>
+                        </div>
+                        <div class="cs-ticket-status-badge">
+                            <span class="${statusClass}">${ticket.status}</span>
+                            <span class="${priorityClass}">${ticket.priority}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-ticket-item-body">
+                        <p>${truncateText(ticket.description, 150)}</p>
+                    </div>
+                    
+                    <div class="cs-ticket-item-footer">
+                        <div class="cs-ticket-stats">
+                            <span><i class="fas fa-comment"></i> ${ticket.reply_count || 0} replies</span>
+                            <span><i class="fas fa-clock"></i> ${formatDuration(ticket.created_at)}</span>
+                            <span><i class="fas fa-user"></i> ${ticket.assigned_to ? ticket.assigned_to : 'Unassigned'}</span>
+                        </div>
+                        <div class="cs-ticket-actions">
+                            <button class="cs-btn cs-btn-sm" onclick="viewTicket('${ticket.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            ${ticket.status === 'open' || ticket.status === 'pending' ? `
+                                <button class="cs-btn cs-btn-sm cs-btn-outline" onclick="replyToTicketFromList('${ticket.id}')">
+                                    <i class="fas fa-reply"></i> Reply
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                ticketsList.appendChild(ticketItem);
+            });
+            
+            updateTicketStats();
+        }
+
+        // Render FAQ
+        function renderFAQ(faqItems) {
+            const faqList = document.getElementById('faqList');
+            faqList.innerHTML = '';
+            
+            if (!faqItems || faqItems.length === 0) {
+                faqItems = getSampleFAQ();
+            }
+            
+            faqItems.forEach((faq, index) => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'cs-faq-item';
+                
+                faqItem.innerHTML = `
+                    <div class="cs-faq-question" onclick="toggleFAQ(${index})">
+                        <h3>${faq.question}</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="cs-faq-answer">
+                        <p>${faq.answer}</p>
+                        <div class="cs-faq-category">
+                            <i class="fas fa-tag"></i> ${faq.category}
+                        </div>
+                        <div class="cs-faq-helpful">
+                            <span>Was this helpful?</span>
+                            <button onclick="markHelpful('${faq.id}')"><i class="fas fa-thumbs-up"></i> Yes</button>
+                            <button onclick="markNotHelpful('${faq.id}')"><i class="fas fa-thumbs-down"></i> No</button>
+                        </div>
+                    </div>
+                `;
+                
+                faqList.appendChild(faqItem);
+            });
+        }
+
+        // Create New Ticket
+        function createNewTicket() {
+            document.getElementById('createTicketModal').style.display = 'block';
+            document.getElementById('ticketForm').reset();
+            attachments = [];
+            updateAttachmentsList();
+            
+            // Populate services dropdown
+            populateServicesDropdown();
+            
+            // Set up file dropzone
+            setupFileDropzone();
+        }
+
+        // Close Create Ticket Modal
+        function closeCreateTicketModal() {
+            document.getElementById('createTicketModal').style.display = 'none';
+            attachments = [];
+        }
+
+        // Populate Services Dropdown
+        function populateServicesDropdown() {
+            const serviceSelect = document.getElementById('ticketService');
+            serviceSelect.innerHTML = '<option value="">None (General Inquiry)</option>';
+            
+            // In a real app, this would fetch user's active services
+            const sampleServices = [
+                { id: '1', name: 'Premium Internet - 100Mbps' },
+                { id: '2', name: 'Static IP Service' },
+                { id: '3', name: 'Business VPN' }
+            ];
+            
+            sampleServices.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.id;
+                option.textContent = service.name;
+                serviceSelect.appendChild(option);
+            });
+        }
+
+        // Set up File Dropzone
+        function setupFileDropzone() {
+            const dropzone = document.getElementById('attachmentsDropzone');
+            const fileInput = document.getElementById('fileInput');
+            
+            dropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+            
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
+            
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                handleFileUpload(files);
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files);
+                fileInput.value = ''; // Reset input
+            });
+        }
+
+        // Handle File Upload
+        function handleFileUpload(files) {
+            Array.from(files).forEach(file => {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showNotification(`File "${file.name}" is too large. Max size: 10MB`, 'error');
+                    return;
+                }
+                
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                if (!allowedTypes.includes(file.type)) {
+                    showNotification(`File type "${file.type}" not supported`, 'error');
+                    return;
+                }
+                
+                // Add to attachments
+                attachments.push({
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.type,
+                    file: file
+                });
+            });
+            
+            updateAttachmentsList();
+        }
+
+        // Update Attachments List
+        function updateAttachmentsList() {
+            const attachmentsList = document.getElementById('attachmentsList');
+            attachmentsList.innerHTML = '';
+            
+            if (attachments.length === 0) {
+                return;
+            }
+            
+            attachments.forEach((attachment, index) => {
+                const attachmentItem = document.createElement('div');
+                attachmentItem.className = 'cs-attachment-item';
+                
+                const icon = getFileIcon(attachment.type);
+                
+                attachmentItem.innerHTML = `
+                    <div class="cs-attachment-info">
+                        <i class="fas ${icon}"></i>
+                        <div>
+                            <span class="cs-attachment-name">${attachment.name}</span>
+                            <span class="cs-attachment-size">${attachment.size}</span>
+                        </div>
+                    </div>
+                    <button class="cs-attachment-remove" onclick="removeAttachment(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                attachmentsList.appendChild(attachmentItem);
+            });
+        }
+
+        // Remove Attachment
+        function removeAttachment(index) {
+            attachments.splice(index, 1);
+            updateAttachmentsList();
+        }
+
+        // Get File Icon
+        function getFileIcon(fileType) {
+            if (fileType.startsWith('image/')) return 'fa-file-image';
+            if (fileType === 'application/pdf') return 'fa-file-pdf';
+            if (fileType.includes('word')) return 'fa-file-word';
+            if (fileType.includes('excel')) return 'fa-file-excel';
+            if (fileType.includes('powerpoint')) return 'fa-file-powerpoint';
+            if (fileType === 'text/plain') return 'fa-file-alt';
+            return 'fa-file';
+        }
+
+        // Submit Ticket
+        async function submitTicket() {
+            const form = document.getElementById('ticketForm');
+            
+            if (!form.checkValidity()) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const ticketData = {
+                user_id: currentUser.id,
+                subject: document.getElementById('ticketSubject').value,
+                category: document.getElementById('ticketCategory').value,
+                priority: document.getElementById('ticketPriority').value,
+                service_id: document.getElementById('ticketService').value || null,
+                service_name: document.getElementById('ticketService').selectedOptions[0].text || null,
+                description: document.getElementById('ticketDescriptionInput').value,
+                status: 'open',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            try {
+                const { data, error } = await supabase
+                    .from('support_tickets')
+                    .insert([ticketData])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Upload attachments if any
+                if (attachments.length > 0) {
+                    await uploadAttachments(data.id);
+                }
+                
+                // Add initial message
+                await supabase
+                    .from('ticket_messages')
+                    .insert([{
+                        ticket_id: data.id,
+                        user_id: currentUser.id,
+                        message: ticketData.description,
+                        is_from_support: false,
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                showNotification('Ticket created successfully!', 'success');
+                
+                // Close modal and refresh
+                closeCreateTicketModal();
+                await loadTickets();
+                
+            } catch (error) {
+                console.error('❌ Error creating ticket:', error);
+                showNotification('Failed to create ticket', 'error');
+            }
+        }
+
+        // Upload Attachments
+        async function uploadAttachments(ticketId) {
+            for (const attachment of attachments) {
+                try {
+                    // In a real app, you would upload to Supabase Storage
+                    // For now, we'll just log it
+                    console.log(`Uploading attachment for ticket ${ticketId}:`, attachment.name);
+                    
+                    await supabase
+                        .from('ticket_attachments')
+                        .insert([{
+                            ticket_id: ticketId,
+                            filename: attachment.name,
+                            filesize: attachment.file.size,
+                            filetype: attachment.type,
+                            uploaded_at: new Date().toISOString()
+                        }]);
+                    
+                } catch (error) {
+                    console.error('❌ Error uploading attachment:', error);
+                }
+            }
+        }
+
+        // View Ticket Details
+        async function viewTicket(ticketId) {
+            const ticket = tickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+            
+            currentTicket = ticket;
+            
+            // Show details panel
+            document.getElementById('ticketDetails').style.display = 'block';
+            document.querySelector('.cs-active-tickets-section').style.display = 'none';
+            
+            // Load ticket details
+            await loadTicketDetails(ticketId);
+        }
+
+        // Load Ticket Details
+        async function loadTicketDetails(ticketId) {
+            try {
+                // Load ticket messages
+                const { data: messages, error: messagesError } = await supabase
+                    .from('ticket_messages')
+                    .select('*')
+                    .eq('ticket_id', ticketId)
+                    .order('created_at', { ascending: true });
+                
+                if (messagesError) throw messagesError;
+                
+                // Update UI
+                document.getElementById('ticketTitle').textContent = currentTicket.subject;
+                document.getElementById('ticketId').textContent = `#${currentTicket.id.slice(-6)}`;
+                document.getElementById('ticketStatus').textContent = currentTicket.status;
+                document.getElementById('ticketPriority').textContent = currentTicket.priority;
+                document.getElementById('ticketDate').textContent = formatDateTime(currentTicket.created_at);
+                document.getElementById('ticketDescription').textContent = currentTicket.description;
+                
+                // Update status classes
+                const statusElement = document.getElementById('ticketStatus');
+                statusElement.className = `cs-ticket-status status-${currentTicket.status}`;
+                
+                const priorityElement = document.getElementById('ticketPriority');
+                priorityElement.className = `cs-ticket-priority priority-${currentTicket.priority}`;
+                
+                // Update button states
+                const replyBtn = document.getElementById('replyBtn');
+                const closeBtn = document.getElementById('closeBtn');
+                
+                if (currentTicket.status === 'resolved' || currentTicket.status === 'closed') {
+                    replyBtn.disabled = true;
+                    closeBtn.disabled = true;
+                    closeBtn.innerHTML = '<i class="fas fa-check"></i> Resolved';
+                } else {
+                    replyBtn.disabled = false;
+                    closeBtn.disabled = false;
+                    closeBtn.innerHTML = '<i class="fas fa-check"></i> Mark Resolved';
+                }
+                
+                // Render conversation
+                renderConversation(messages || []);
+                
+            } catch (error) {
+                console.error('❌ Error loading ticket details:', error);
+                showNotification('Failed to load ticket details', 'error');
+            }
+        }
+
+        // Render Conversation
+        function renderConversation(messages) {
+            const thread = document.getElementById('conversationThread');
+            thread.innerHTML = '';
+            
+            if (messages.length === 0) {
+                thread.innerHTML = `
+                    <div class="cs-no-messages">
+                        <i class="fas fa-comments"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `cs-message ${message.is_from_support ? 'support' : 'user'}`;
+                
+                const time = formatDateTime(message.created_at);
+                const sender = message.is_from_support ? 'Support Agent' : 'You';
+                
+                messageElement.innerHTML = `
+                    <div class="cs-message-header">
+                        <span class="cs-message-sender">${sender}</span>
+                        <span class="cs-message-time">${time}</span>
+                    </div>
+                    <div class="cs-message-body">
+                        ${message.message}
+                    </div>
+                    ${message.attachments ? `
+                        <div class="cs-message-attachments">
+                            <i class="fas fa-paperclip"></i>
+                            <span>${message.attachments.length} attachment(s)</span>
+                        </div>
+                    ` : ''}
+                `;
+                
+                thread.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            thread.scrollTop = thread.scrollHeight;
+        }
+
+        // Hide Ticket Details
+        function hideTicketDetails() {
+            document.getElementById('ticketDetails').style.display = 'none';
+            document.querySelector('.cs-active-tickets-section').style.display = 'block';
+            currentTicket = null;
+        }
+
+        // Reply to Ticket
+        async function replyToTicket() {
+            const message = document.getElementById('replyMessage').value.trim();
+            
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            if (!currentTicket) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('ticket_messages')
+                    .insert([{
+                        ticket_id: currentTicket.id,
+                        user_id: currentUser.id,
+                        message: message,
+                        is_from_support: false,
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                if (error) throw error;
+                
+                // Update ticket
+                await supabase
+                    .from('support_tickets')
+                    .update({
+                        status: 'pending',
+                        updated_at: new Date().toISOString(),
+                        reply_count: (currentTicket.reply_count || 0) + 1
+                    })
+                    .eq('id', currentTicket.id);
+                
+                // Clear input
+                document.getElementById('replyMessage').value = '';
+                
+                // Refresh conversation
+                await loadTicketDetails(currentTicket.id);
+                
+                // Refresh tickets list
+                await loadTickets();
+                
+                showNotification('Reply sent successfully', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error sending reply:', error);
+                showNotification('Failed to send reply', 'error');
+            }
+        }
+
+        // Close Ticket
+        async function closeTicket() {
+            if (!currentTicket) return;
+            
+            if (!confirm('Are you sure you want to mark this ticket as resolved?')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('support_tickets')
+                    .update({
+                        status: 'resolved',
+                        resolved_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentTicket.id);
+                
+                if (error) throw error;
+                
+                // Add resolution message
+                await supabase
+                    .from('ticket_messages')
+                    .insert([{
+                        ticket_id: currentTicket.id,
+                        user_id: currentUser.id,
+                        message: 'Ticket marked as resolved by user.',
+                        is_from_support: false,
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                showNotification('Ticket marked as resolved', 'success');
+                
+                // Refresh
+                await loadTicketDetails(currentTicket.id);
+                await loadTickets();
+                
+            } catch (error) {
+                console.error('❌ Error closing ticket:', error);
+                showNotification('Failed to close ticket', 'error');
+            }
+        }
+
+        // Filter Tickets
+        function filterTickets() {
+            renderTickets();
+        }
+
+        // Sort Tickets
+        function sortTickets() {
+            renderTickets();
+        }
+
+        // Refresh Tickets
+        function refreshTickets() {
+            loadTickets();
+            showNotification('Refreshing tickets...', 'info');
+        }
+
+        // View Knowledge Base
+        function viewKnowledgeBase() {
+            showNotification('Opening knowledge base...', 'info');
+            // In production, this would redirect to knowledge base page
+        }
+
+        // Show Help Category
+        function showHelpCategory(category) {
+            let message = '';
+            
+            switch (category) {
+                case 'internet':
+                    message = 'For internet issues:\n\n1. Check if your router is powered on\n2. Restart your router and modem\n3. Check for service outages in your area\n4. Run a speed test to verify connection\n\nIf issues persist, create a ticket for technical support.';
+                    break;
+                case 'billing':
+                    message = 'For billing questions:\n\n1. Check your billing history in the Billing section\n2. Verify payment methods are up to date\n3. Review upcoming bills and due dates\n4. Contact billing support for specific questions';
+                    break;
+                case 'hardware':
+                    message = 'For hardware problems:\n\n1. Ensure all cables are properly connected\n2. Check LED indicators on your equipment\n3. Try rebooting the hardware\n4. Refer to equipment manuals for troubleshooting\n\nIf hardware needs replacement, create a ticket.';
+                    break;
+                case 'account':
+                    message = 'For account management:\n\n1. Update profile information in Profile section\n2. Use password reset option if needed\n3. Check subscription details in Services section\n4. Contact support for account-specific changes';
+                    break;
+            }
+            
+            alert(message);
+        }
+
+        // Call Support
+        function callSupport() {
+            if (confirm('Call support hotline at 0700 123 456?')) {
+                // In a real app, this would initiate a phone call
+                showNotification('Initiating call to support...', 'info');
+            }
+        }
+
+        // Email Support
+        function emailSupport() {
+            const email = 'support@connectsphere.co.ke';
+            const subject = encodeURIComponent('Support Request');
+            const body = encodeURIComponent(`\n\n---\nUser ID: ${currentUser.id}\nEmail: ${currentUser.email}`);
+            
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        }
+
+        // Start Live Chat
+        function startLiveChat() {
+            showNotification('Live chat is currently offline. Please call or email support.', 'info');
+        }
+
+        // Toggle FAQ
+        function toggleFAQ(index) {
+            const faqItems = document.querySelectorAll('.cs-faq-item');
+            const faqItem = faqItems[index];
+            
+            faqItem.classList.toggle('open');
+            
+            const icon = faqItem.querySelector('.fa-chevron-down');
+            if (faqItem.classList.contains('open')) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Mark FAQ as Helpful
+        async function markHelpful(faqId) {
+            try {
+                const { error } = await supabase
+                    .from('faq')
+                    .update({ 
+                        helpful_count: supabase.raw('helpful_count + 1'),
+                        view_count: supabase.raw('view_count + 1')
+                    })
+                    .eq('id', faqId);
+                
+                if (error) throw error;
+                
+                showNotification('Thank you for your feedback!', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error updating FAQ:', error);
+            }
+        }
+
+        // Mark FAQ as Not Helpful
+        async function markNotHelpful(faqId) {
+            try {
+                const { error } = await supabase
+                    .from('faq')
+                    .update({ 
+                        unhelpful_count: supabase.raw('unhelpful_count + 1'),
+                        view_count: supabase.raw('view_count + 1')
+                    })
+                    .eq('id', faqId);
+                
+                if (error) throw error;
+                
+                showNotification('Thank you for your feedback. We\'ll improve this answer.', 'info');
+                
+            } catch (error) {
+                console.error('❌ Error updating FAQ:', error);
+            }
+        }
+
+        // View All FAQs
+        function viewAllFAQs() {
+            showNotification('Loading all FAQs...', 'info');
+            // In production, this would load more FAQs
+        }
+
+        // Helper Functions
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substr(0, maxLength) + '...';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function formatDuration(dateString) {
+            if (!dateString) return '0d';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            return `${diffDays}d`;
+        }
+
+        // Sample Data Functions
+        function getSampleTickets() {
+            return [
+                {
+                    id: '1',
+                    subject: 'Slow internet speeds in the evening',
+                    category: 'internet',
+                    priority: 'high',
+                    status: 'open',
+                    description: 'Internet speeds drop significantly between 7 PM and 11 PM every day. Normal speeds are 80-90 Mbps, but during these hours it drops to 10-15 Mbps.',
+                    service_name: 'Premium Internet - 100Mbps',
+                    reply_count: 2,
+                    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: '2',
+                    subject: 'Invoice payment failed',
+                    category: 'billing',
+                    priority: 'medium',
+                    status: 'pending',
+                    description: 'My M-Pesa payment for January invoice failed but money was deducted from my account.',
+                    service_name: null,
+                    reply_count: 1,
+                    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    id: '3',
+                    subject: 'Router keeps disconnecting',
+                    category: 'hardware',
+                    priority: 'high',
+                    status: 'resolved',
+                    description: 'TP-Link Archer C7 router disconnects every few hours. Need replacement or configuration help.',
+                    service_name: 'Premium Internet - 100Mbps',
+                    reply_count: 5,
+                    resolved_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+                    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+        }
+
+        function getSampleFAQ() {
+            return [
+                {
+                    id: '1',
+                    question: 'How do I reset my router?',
+                    answer: 'To reset your router: 1. Locate the reset button (usually a small hole) 2. Use a paperclip to press and hold for 10 seconds 3. Wait for the router to reboot completely 4. Reconfigure your WiFi settings',
+                    category: 'Hardware',
+                    view_count: 125,
+                    helpful_count: 98
+                },
+                {
+                    id: '2',
+                    question: 'Why is my internet slow during peak hours?',
+                    answer: 'Slow speeds during peak hours (7-11 PM) are often due to network congestion. We continuously monitor and upgrade our infrastructure. For persistent issues, please run a speed test and submit the results in a support ticket.',
+                    category: 'Internet',
+                    view_count: 89,
+                    helpful_count: 67
+                },
+                {
+                    id: '3',
+                    question: 'How do I change my billing information?',
+                    answer: 'You can update your billing information in the Billing section of your portal. Go to Payment Methods to add or update your payment details. Changes take effect immediately for future payments.',
+                    category: 'Billing',
+                    view_count: 76,
+                    helpful_count: 62
+                },
+                {
+                    id: '4',
+                    question: 'What should I do if my payment fails?',
+                    answer: 'If a payment fails: 1. Check your account balance 2. Verify payment method details 3. Try again after 30 minutes 4. If money was deducted but payment failed, contact billing support immediately with transaction details.',
+                    category: 'Billing',
+                    view_count: 54,
+                    helpful_count: 45
+                },
+                {
+                    id: '5',
+                    question: 'How many devices can I connect simultaneously?',
+                    answer: 'Your plan supports up to 20 devices. For optimal performance, we recommend: - Wired connections for stationary devices - 5GHz band for high-bandwidth devices - Regular review of connected devices in Services section',
+                    category: 'Internet',
+                    view_count: 42,
+                    helpful_count: 38
+                },
+                {
+                    id: '6',
+                    question: 'How do I report an outage?',
+                    answer: 'To report an outage: 1. Check our status page first 2. Run a speed test to confirm 3. Restart your equipment 4. If issue persists, create a ticket with details. For widespread outages, we post updates on our status page and social media.',
+                    category: 'Internet',
+                    view_count: 31,
+                    helpful_count: 28
+                }
+            ];
+        }
+
+        function renderSampleFAQ() {
+            renderFAQ(getSampleFAQ());
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            // Create notification center if it doesn't exist
+            let notificationCenter = document.getElementById('notificationCenter');
+            if (!notificationCenter) {
+                notificationCenter = document.createElement('div');
+                notificationCenter.id = 'notificationCenter';
+                notificationCenter.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                `;
+                document.body.appendChild(notificationCenter);
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                padding: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+            `;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon}" style="color: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'}"></i>
+                <div style="flex: 1;">
+                    <p style="margin: 0; font-weight: 600;">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #6B7280; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notificationCenter.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.innerHTML = `
+                <div class="cs-loading-content">
+                    <div style="color: #EF4444; font-size: 3rem; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2>Support Error</h2>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #0066FF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Refresh Page
+                    </button>
+                </div>
+            `;
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Close modals when clicking outside
+            document.getElementById('createTicketModal').addEventListener('click', (e) => {
+                if (e.target.id === 'createTicketModal') {
+                    closeCreateTicketModal();
+                }
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeCreateTicketModal();
+                }
+                if (e.ctrlKey && e.key === 'n') {
+                    e.preventDefault();
+                    createNewTicket();
+                }
+            });
+        }
+
+        // Handle Logout
+        async function handleLogout(e) {
+            e.preventDefault();
+            
+            try {
+                await supabase.auth.signOut();
+                localStorage.removeItem('cs_session');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showNotification('Logout failed. Please try again.', 'error');
+            }
+        }
+    </script>
+
+    <style>
+        /* Modal Styles */
+        .cs-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cs-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cs-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .cs-modal-header h3 {
+            margin: 0;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cs-modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6B7280;
+        }
+        
+        .cs-modal-body {
+            padding: 24px;
+        }
+        
+        .cs-modal-footer {
+            padding: 24px;
+            border-top: 1px solid #E5E7EB;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        /* Form Styles */
+        .cs-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .cs-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-form-group input,
+        .cs-form-group select,
+        .cs-form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .cs-form-group input:focus,
+        .cs-form-group select:focus,
+        .cs-form-group textarea:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .cs-form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Attachments Area */
+        .cs-attachments-area {
+            margin-top: 10px;
+        }
+        
+        .cs-attachments-dropzone {
+            border: 2px dashed #D1D5DB;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cs-attachments-dropzone:hover {
+            border-color: #0066FF;
+            background: rgba(0, 102, 255, 0.05);
+        }
+        
+        .cs-attachments-dropzone.dragover {
+            border-color: #0066FF;
+            background: rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-attachments-dropzone i {
+            font-size: 3rem;
+            color: #9CA3AF;
+            margin-bottom: 15px;
+        }
+        
+        .cs-attachments-dropzone p {
+            margin: 5px 0;
+            color: #6B7280;
+        }
+        
+        .cs-attachments-note {
+            font-size: 0.9rem;
+            color: #9CA3AF;
+        }
+        
+        .cs-attachments-list {
+            margin-top: 15px;
+        }
+        
+        .cs-attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #F9FAFB;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .cs-attachment-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cs-attachment-info i {
+            color: #6B7280;
+            font-size: 1.2rem;
+        }
+        
+        .cs-attachment-name {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-attachment-size {
+            display: block;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+        
+        .cs-attachment-remove {
+            background: none;
+            border: none;
+            color: #9CA3AF;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .cs-attachment-remove:hover {
+            background: #F3F4F6;
+            color: #EF4444;
+        }
+        
+        /* Quick Help Section */
+        .cs-help-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .cs-help-category {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cs-help-category:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #0066FF;
+        }
+        
+        .cs-category-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0066FF;
+            font-size: 1.5rem;
+        }
+        
+        .cs-category-content {
+            flex: 1;
+        }
+        
+        .cs-category-content h3 {
+            margin: 0 0 5px;
+            font-size: 1.1rem;
+            color: #1F2937;
+        }
+        
+        .cs-category-content p {
+            margin: 0;
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+        
+        .cs-category-arrow {
+            color: #9CA3AF;
+            font-size: 1.2rem;
+        }
+        
+        /* Tickets List */
+        .cs-tickets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .cs-ticket-item {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .cs-ticket-item:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .cs-ticket-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px;
+            border-bottom: 1px solid #F3F4F6;
+        }
+        
+        .cs-ticket-info h3 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+            color: #1F2937;
+        }
+        
+        .cs-ticket-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.85rem;
+        }
+        
+        .cs-ticket-id {
+            background: #F3F4F6;
+            color: #374151;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .cs-ticket-service,
+        .cs-ticket-category,
+        .cs-ticket-date {
+            color: #6B7280;
+        }
+        
+        .cs-ticket-status-badge {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .cs-ticket-status-badge span {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-open {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+        
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .status-resolved {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .status-closed {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6B7280;
+        }
+        
+        .priority-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .priority-medium {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .priority-high {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+        
+        .priority-urgent {
+            background: rgba(220, 38, 38, 0.1);
+            color: #DC2626;
+        }
+        
+        .cs-ticket-item-body {
+            padding: 0 20px;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+        
+        .cs-ticket-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #F9FAFB;
+            border-top: 1px solid #F3F4F6;
+        }
+        
+        .cs-ticket-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: #6B7280;
+        }
+        
+        .cs-ticket-stats span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .cs-ticket-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* No Tickets State */
+        .cs-no-tickets {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cs-no-tickets i {
+            font-size: 4rem;
+            color: #D1D5DB;
+            margin-bottom: 20px;
+        }
+        
+        .cs-no-tickets h3 {
+            margin: 0 0 10px;
+            color: #374151;
+        }
+        
+        .cs-no-tickets p {
+            color: #6B7280;
+            margin-bottom: 20px;
+        }
+        
+        /* Ticket Details */
+        .cs-ticket-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .cs-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: #6B7280;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .cs-back-btn:hover {
+            background: #F3F4F6;
+            color: #374151;
+        }
+        
+        .cs-ticket-main-info {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cs-ticket-title-section h2 {
+            margin: 0 0 15px;
+            color: #1F2937;
+            font-size: 1.8rem;
+        }
+        
+        .cs-ticket-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .cs-ticket-status,
+        .cs-ticket-priority {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .cs-ticket-date {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+        
+        .cs-ticket-description h3 {
+            margin: 0 0 15px;
+            color: #374151;
+        }
+        
+        .cs-ticket-description p {
+            color: #4B5563;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        /* Conversation */
+        .cs-ticket-conversation {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .cs-ticket-conversation h3 {
+            margin: 0 0 20px;
+            color: #374151;
+        }
+        
+        .cs-conversation-thread {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+            padding-right: 10px;
+        }
+        
+        .cs-message {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .cs-message.user {
+            background: #F0F9FF;
+            border-left: 4px solid #0066FF;
+        }
+        
+        .cs-message.support {
+            background: #F3F4F6;
+            border-left: 4px solid #10B981;
+        }
+        
+        .cs-message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .cs-message-sender {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-message-time {
+            color: #6B7280;
+        }
+        
+        .cs-message-body {
+            color: #4B5563;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .cs-message-attachments {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+        
+        .cs-reply-section textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .cs-reply-section textarea:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-reply-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cs-attachment-btn {
+            background: none;
+            border: none;
+            color: #6B7280;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cs-attachment-btn:hover {
+            background: #F3F4F6;
+            color: #374151;
+        }
+        
+        /* Support Contacts */
+        .cs-contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .cs-contact-method {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+        
+        .cs-contact-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0066FF;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .cs-contact-info h3 {
+            margin: 0 0 10px;
+            color: #1F2937;
+        }
+        
+        .cs-contact-info p {
+            color: #6B7280;
+            margin-bottom: 20px;
+        }
+        
+        .cs-contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #4B5563;
+        }
+        
+        .cs-contact-btn {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            background: white;
+            color: #374151;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .cs-contact-btn:hover {
+            background: #F9FAFB;
+            border-color: #9CA3AF;
+        }
+        
+        .cs-contact-btn.primary {
+            background: #0066FF;
+            color: white;
+            border-color: #0066FF;
+        }
+        
+        .cs-contact-btn.primary:hover {
+            background: #0052D4;
+        }
+        
+        /* FAQ Section */
+        .cs-faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .cs-faq-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #E5E7EB;
+        }
+        
+        .cs-faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cs-faq-question h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #1F2937;
+            flex: 1;
+        }
+        
+        .cs-faq-question i {
+            color: #6B7280;
+            transition: transform 0.3s;
+        }
+        
+        .cs-faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .cs-faq-item.open .cs-faq-answer {
+            padding: 0 20px 20px;
+            max-height: 500px;
+        }
+        
+        .cs-faq-answer p {
+            color: #4B5563;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .cs-faq-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            background: #F3F4F6;
+            color: #6B7280;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+        
+        .cs-faq-helpful {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+        
+        .cs-faq-helpful button {
+            background: none;
+            border: 1px solid #D1D5DB;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #6B7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .cs-faq-helpful button:hover {
+            background: #F9FAFB;
+            color: #374151;
+        }
+        
+        /* Button Styles */
+        .cs-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .cs-btn-primary {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .cs-btn-primary:hover {
+            background: #0052D4;
+        }
+        
+        .cs-btn-outline {
+            background: white;
+            color: #0066FF;
+            border: 2px solid #0066FF;
+        }
+        
+        .cs-btn-outline:hover {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .cs-btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Ticket Filter */
+        .cs-ticket-filter {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cs-ticket-filter select {
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+        }
+        
+        /* Loading Spinner */
+        .cs-loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #0066FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+                              </html>
