@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Services - ConnectSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="cs-loading-screen">
+        <div class="cs-loading-content">
+            <div class="cs-loading-spinner"></div>
+            <h2>ConnectSphere Portal</h2>
+            <p>Loading Services...</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Navigation -->
+        <nav class="cs-navbar">
+            <div class="cs-navbar-brand">
+                <i class="fas fa-wifi"></i>
+                <span>ConnectSphere</span>
+            </div>
+            
+            <div class="cs-navbar-menu">
+                <a href="index.html" class="cs-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Portal</span>
+                </a>
+                <a href="dashboard.html" class="cs-nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="services.html" class="cs-nav-item active">
+                    <i class="fas fa-wifi"></i>
+                    <span>Services</span>
+                </a>
+                <a href="billing.html" class="cs-nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Billing</span>
+                </a>
+                <a href="tickets.html" class="cs-nav-item">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Support</span>
+                </a>
+                <div class="cs-nav-item dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                    <div class="cs-dropdown-menu">
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="cs-divider"></div>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="cs-main-content">
+            <div class="cs-container">
+                <!-- Services Header -->
+                <div class="cs-services-page-header">
+                    <h1><i class="fas fa-wifi"></i> My Services</h1>
+                    <p>Manage your internet services and subscriptions</p>
+                </div>
+
+                <!-- Active Services -->
+                <div class="cs-active-services">
+                    <h2><i class="fas fa-check-circle"></i> Active Services</h2>
+                    
+                    <div class="cs-service-plans">
+                        <div class="cs-service-plan active">
+                            <div class="cs-plan-header">
+                                <div class="cs-plan-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="cs-plan-info">
+                                    <h3>Premium Internet</h3>
+                                    <p>Unlimited High-Speed</p>
+                                </div>
+                                <span class="cs-plan-status active">Active</span>
+                            </div>
+                            
+                            <div class="cs-plan-details">
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>100 Mbps Speed</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-database"></i>
+                                    <span>Unlimited Data</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-users"></i>
+                                    <span>Up to 10 Devices</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Security Included</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-plan-usage">
+                                <div class="cs-usage-bar">
+                                    <div class="cs-usage-fill" style="width: 65%"></div>
+                                </div>
+                                <div class="cs-usage-text">
+                                    <span>65% of monthly data used</span>
+                                    <span>Renews in 15 days</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-plan-actions">
+                                <button class="cs-plan-btn primary" onclick="upgradePlan()">
+                                    <i class="fas fa-arrow-up"></i> Upgrade
+                                </button>
+                                <button class="cs-plan-btn" onclick="managePlan()">
+                                    <i class="fas fa-cog"></i> Manage
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Plans -->
+                <div class="cs-available-plans">
+                    <h2><i class="fas fa-star"></i> Available Plans</h2>
+                    
+                    <div class="cs-plans-grid">
+                        <div class="cs-plan-card">
+                            <div class="cs-plan-card-header">
+                                <h3>Basic</h3>
+                                <div class="cs-plan-price">
+                                    <span class="cs-price">KES 1,500</span>
+                                    <span class="cs-period">/month</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-plan-features">
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>25 Mbps Speed</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>100 GB Data</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>5 Devices</span>
+                                </div>
+                                <div class="cs-plan-feature disabled">
+                                    <i class="fas fa-times"></i>
+                                    <span>Priority Support</span>
+                                </div>
+                            </div>
+                            
+                            <button class="cs-subscribe-btn" onclick="subscribePlan('basic')">
+                                Subscribe Now
+                            </button>
+                        </div>
+                        
+                        <div class="cs-plan-card featured">
+                            <div class="cs-plan-badge">Most Popular</div>
+                            <div class="cs-plan-card-header">
+                                <h3>Standard</h3>
+                                <div class="cs-plan-price">
+                                    <span class="cs-price">KES 2,500</span>
+                                    <span class="cs-period">/month</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-plan-features">
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>50 Mbps Speed</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>250 GB Data</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>10 Devices</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>Basic Support</span>
+                                </div>
+                            </div>
+                            
+                            <button class="cs-subscribe-btn primary" onclick="subscribePlan('standard')">
+                                Subscribe Now
+                            </button>
+                        </div>
+                        
+                        <div class="cs-plan-card">
+                            <div class="cs-plan-card-header">
+                                <h3>Premium</h3>
+                                <div class="cs-plan-price">
+                                    <span class="cs-price">KES 4,000</span>
+                                    <span class="cs-period">/month</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-plan-features">
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>100 Mbps Speed</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>Unlimited Data</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>20 Devices</span>
+                                </div>
+                                <div class="cs-plan-feature">
+                                    <i class="fas fa-check"></i>
+                                    <span>Priority Support</span>
+                                </div>
+                            </div>
+                            
+                            <button class="cs-subscribe-btn" onclick="subscribePlan('premium')">
+                                Subscribe Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hardware/Equipment -->
+                <div class="cs-hardware-section">
+                    <h2><i class="fas fa-hdd"></i> My Equipment</h2>
+                    
+                    <div class="cs-hardware-grid">
+                        <div class="cs-hardware-card">
+                            <div class="cs-hardware-icon">
+                                <i class="fas fa-wifi"></i>
+                            </div>
+                            <div class="cs-hardware-info">
+                                <h3>Router - TP-Link Archer C7</h3>
+                                <p>Serial: TP-AC7-123456</p>
+                                <div class="cs-hardware-status">
+                                    <i class="fas fa-circle online"></i>
+                                    <span>Online</span>
+                                </div>
+                            </div>
+                            <button class="cs-hardware-btn" onclick="manageRouter()">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="cs-hardware-card">
+                            <div class="cs-hardware-icon">
+                                <i class="fas fa-satellite-dish"></i>
+                            </div>
+                            <div class="cs-hardware-info">
+                                <h3>Antenna - Ubiquiti LiteBeam</h3>
+                                <p>Serial: UBLB-789012</p>
+                                <div class="cs-hardware-status">
+                                    <i class="fas fa-circle online"></i>
+                                    <span>Online</span>
+                                </div>
+                            </div>
+                            <button class="cs-hardware-btn" onclick="manageAntenna()">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Speed Test -->
+                <div class="cs-speed-test-section">
+                    <h2><i class="fas fa-tachometer-alt"></i> Speed Test</h2>
+                    
+                    <div class="cs-speed-test-card">
+                        <div class="cs-speed-test-header">
+                            <h3>Test Your Connection Speed</h3>
+                            <p>Get accurate download and upload speeds</p>
+                        </div>
+                        
+                        <div class="cs-speed-results">
+                            <div class="cs-speed-result">
+                                <div class="cs-speed-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="cs-speed-info">
+                                    <span class="cs-speed-label">Download</span>
+                                    <span class="cs-speed-value" id="downloadSpeed">-- Mbps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-speed-result">
+                                <div class="cs-speed-icon">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <div class="cs-speed-info">
+                                    <span class="cs-speed-label">Upload</span>
+                                    <span class="cs-speed-value" id="uploadSpeed">-- Mbps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="cs-speed-result">
+                                <div class="cs-speed-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="cs-speed-info">
+                                    <span class="cs-speed-label">Ping</span>
+                                    <span class="cs-speed-value" id="pingSpeed">-- ms</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="cs-speed-test-btn" onclick="startSpeedTest()">
+                            <i class="fas fa-play"></i> Start Speed Test
+                        </button>
+                        
+                        <div class="cs-speed-test-progress" style="display: none;">
+                            <div class="cs-progress-bar">
+                                <div class="cs-progress-fill"></div>
+                            </div>
+                            <p>Testing your connection speed...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service History -->
+                <div class="cs-service-history">
+                    <h2><i class="fas fa-history"></i> Service History</h2>
+                    
+                    <div class="cs-history-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Service</th>
+                                    <th>Action</th>
+                                    <th>Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="serviceHistoryTable">
+                                <!-- History will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="cs-footer">
+            <div class="cs-footer-content">
+                <div class="cs-footer-brand">
+                    <i class="fas fa-wifi"></i>
+                    <span>ConnectSphere</span>
+                </div>
+                <p>Enterprise WiFi Management Platform</p>
+                <div class="cs-footer-links">
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Support</a>
+                </div>
+                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Services Page
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadServiceHistory();
+            }, 1000);
+        });
+
+        function loadServiceHistory() {
+            const history = [
+                { date: '2024-01-15', service: 'Plan Upgrade', action: 'Upgraded to Premium', status: 'Completed', details: 'From Standard to Premium' },
+                { date: '2024-01-10', service: 'Payment', action: 'Monthly Subscription', status: 'Paid', details: 'KES 4,000' },
+                { date: '2024-01-05', service: 'Support', action: 'Router Configuration', status: 'Resolved', details: 'Ticket #TKT-789' },
+                { date: '2023-12-28', service: 'Plan Change', action: 'Changed billing cycle', status: 'Completed', details: 'Monthly to Quarterly' },
+                { date: '2023-12-15', service: 'Hardware', action: 'Router Replacement', status: 'Delivered', details: 'TP-Link Archer C7' }
+            ];
+            
+            const table = document.getElementById('serviceHistoryTable');
+            table.innerHTML = '';
+            
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.service}</td>
+                    <td>${item.action}</td>
+                    <td><span class="cs-history-status ${item.status.toLowerCase()}">${item.status}</span></td>
+                    <td>${item.details}</td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function startSpeedTest() {
+            const btn = document.querySelector('.cs-speed-test-btn');
+            const progress = document.querySelector('.cs-speed-test-progress');
+            
+            btn.style.display = 'none';
+            progress.style.display = 'block';
+            
+            // Simulate speed test
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += 10;
+                document.querySelector('.cs-progress-fill').style.width = progressValue + '%';
+                
+                if (progressValue >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // Simulate results
+                    document.getElementById('downloadSpeed').textContent = '85.2 Mbps';
+                    document.getElementById('uploadSpeed').textContent = '22.4 Mbps';
+                    document.getElementById('pingSpeed').textContent = '24 ms';
+                    
+                    progress.innerHTML = `
+                        <div class="cs-test-complete">
+                            <i class="fas fa-check-circle"></i>
+                            <p>Speed test completed successfully!</p>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        btn.style.display = 'block';
+                        progress.style.display = 'none';
+                        document.querySelector('.cs-progress-fill').style.width = '0%';
+                    }, 2000);
+                }
+            }, 300);
+        }
+
+        function subscribePlan(plan) {
+            if (confirm(`Are you sure you want to subscribe to the ${plan} plan?`)) {
+                alert(`Successfully subscribed to ${plan} plan! Redirecting to payment...`);
+                window.location.href = 'billing.html?plan=' + plan;
+            }
+        }
+
+        function upgradePlan() {
+            window.location.href = '#available-plans';
+        }
+
+        function managePlan() {
+            alert('Opening plan management...');
+        }
+
+        function manageRouter() {
+            alert('Router management options coming soon!');
+        }
+
+        function manageAntenna() {
+            alert('Antenna management options coming soon!');
+        }
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('cs_session');
+            window.location.href = 'index.html';
+        });
+    </script>
+
+    <style>
+        /* Services Page Specific Styles */
+        .cs-services-page-header {
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .cs-services-page-header h1 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 2.2rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .cs-active-services,
+        .cs-available-plans,
+        .cs-hardware-section,
+        .cs-speed-test-section,
+        .cs-service-history {
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .cs-active-services h2,
+        .cs-available-plans h2,
+        .cs-hardware-section h2,
+        .cs-speed-test-section h2,
+        .cs-service-history h2 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            color: var(--dark);
+        }
+        
+        /* Service Plans */
+        .cs-service-plans {
+            display: grid;
+            gap: var(--space-lg);
+        }
+        
+        .cs-service-plan {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--gray-200);
+        }
+        
+        .cs-service-plan.active {
+            border-color: var(--primary);
+        }
+        
+        .cs-plan-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-plan-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .cs-plan-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: var(--space-xs);
+            color: var(--dark);
+        }
+        
+        .cs-plan-info p {
+            color: var(--gray-600);
+        }
+        
+        .cs-plan-status {
+            margin-left: auto;
+            padding: var(--space-xs) var(--space-md);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .cs-plan-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-plan-feature {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--gray-700);
+        }
+        
+        .cs-plan-feature i {
+            color: var(--primary);
+        }
+        
+        .cs-plan-usage {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-usage-bar {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-sm);
+            overflow: hidden;
+        }
+        
+        .cs-usage-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: var(--radius-full);
+        }
+        
+        .cs-usage-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+        
+        .cs-plan-actions {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        .cs-plan-btn {
+            flex: 1;
+            padding: var(--space-md);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: var(--white);
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .cs-plan-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .cs-plan-btn.primary {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        .cs-plan-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* Available Plans */
+        .cs-plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-xl);
+        }
+        
+        .cs-plan-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--gray-200);
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .cs-plan-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .cs-plan-card.featured {
+            border-color: var(--primary);
+        }
+        
+        .cs-plan-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--white);
+            padding: var(--space-xs) var(--space-lg);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .cs-plan-card-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-plan-card-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--dark);
+        }
+        
+        .cs-plan-price {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: var(--space-xs);
+        }
+        
+        .cs-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .cs-period {
+            color: var(--gray-600);
+        }
+        
+        .cs-plan-features {
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-plan-feature {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) 0;
+            color: var(--gray-700);
+        }
+        
+        .cs-plan-feature i {
+            color: var(--success);
+        }
+        
+        .cs-plan-feature.disabled i {
+            color: var(--gray-400);
+        }
+        
+        .cs-plan-feature.disabled span {
+            color: var(--gray-400);
+            text-decoration: line-through;
+        }
+        
+        .cs-subscribe-btn {
+            width: 100%;
+            padding: var(--space-lg);
+            background: var(--gray-100);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cs-subscribe-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+        
+        .cs-subscribe-btn.primary {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+        
+        .cs-subscribe-btn.primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* Hardware Section */
+        .cs-hardware-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .cs-hardware-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-hardware-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .cs-hardware-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: var(--space-xs);
+            color: var(--
