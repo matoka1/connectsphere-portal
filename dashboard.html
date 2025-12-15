@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ConnectSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="cs-loading-screen">
+        <div class="cs-loading-content">
+            <div class="cs-loading-spinner"></div>
+            <h2>ConnectSphere Portal</h2>
+            <p>Loading Dashboard...</p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Navigation -->
+        <nav class="cs-navbar">
+            <div class="cs-navbar-brand">
+                <i class="fas fa-wifi"></i>
+                <span>ConnectSphere</span>
+            </div>
+            
+            <div class="cs-navbar-menu">
+                <a href="index.html" class="cs-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Portal</span>
+                </a>
+                <a href="dashboard.html" class="cs-nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="services.html" class="cs-nav-item">
+                    <i class="fas fa-wifi"></i>
+                    <span>Services</span>
+                </a>
+                <a href="billing.html" class="cs-nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Billing</span>
+                </a>
+                <a href="tickets.html" class="cs-nav-item">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Support</span>
+                </a>
+                <div class="cs-nav-item dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                    <div class="cs-dropdown-menu">
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="cs-divider"></div>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="cs-main-content">
+            <div class="cs-container">
+                <!-- Dashboard Header -->
+                <div class="cs-dashboard-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+                    <p>Welcome back, <span id="userName">User</span>! Here's your connection overview.</p>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="cs-stats-grid">
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="currentSpeed">25 Mbps</h3>
+                            <p>Current Speed</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="dataUsed">4.2 GB</h3>
+                            <p>Data Used Today</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="uptime">98.5%</h3>
+                            <p>Network Uptime</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="daysLeft">15 Days</h3>
+                            <p>Billing Cycle</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="cs-charts-section">
+                    <div class="cs-chart-container">
+                        <div class="cs-chart-header">
+                            <h3><i class="fas fa-chart-line"></i> Data Usage (Last 7 Days)</h3>
+                            <select id="chartRange" onchange="updateChart()">
+                                <option value="7">7 Days</option>
+                                <option value="30">30 Days</option>
+                                <option value="90">90 Days</option>
+                            </select>
+                        </div>
+                        <canvas id="usageChart" height="300"></canvas>
+                    </div>
+                    
+                    <div class="cs-chart-container">
+                        <div class="cs-chart-header">
+                            <h3><i class="fas fa-chart-bar"></i> Speed Test History</h3>
+                        </div>
+                        <canvas id="speedChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="cs-status-card">
+                    <div class="cs-status-header">
+                        <h3><i class="fas fa-network-wired"></i> Connection Status</h3>
+                        <div class="cs-status-indicator connected">
+                            <i class="fas fa-circle"></i>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-status-details">
+                        <div class="cs-status-item">
+                            <span class="cs-status-label">IP Address:</span>
+                            <span class="cs-status-value" id="ipAddress">192.168.1.100</span>
+                        </div>
+                        <div class="cs-status-item">
+                            <span class="cs-status-label">MAC Address:</span>
+                            <span class="cs-status-value" id="macAddress">00:1A:2B:3C:4D:5E</span>
+                        </div>
+                        <div class="cs-status-item">
+                            <span class="cs-status-label">Connected Since:</span>
+                            <span class="cs-status-value" id="connectedSince">2 hours ago</span>
+                        </div>
+                        <div class="cs-status-item">
+                            <span class="cs-status-label">Session Expires:</span>
+                            <span class="cs-status-value" id="sessionExpires">in 2 hours</span>
+                        </div>
+                    </div>
+                    
+                    <button class="cs-disconnect-btn" onclick="disconnect()">
+                        <i class="fas fa-power-off"></i> Disconnect
+                    </button>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="cs-recent-activity">
+                    <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    <div class="cs-activity-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Activity</th>
+                                    <th>Details</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityTable">
+                                <!-- Activities will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="cs-quick-actions">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    <div class="cs-action-buttons">
+                        <button class="cs-action-btn" onclick="runSpeedTest()">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Speed Test</span>
+                        </button>
+                        <button class="cs-action-btn" onclick="topUpData()">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Top Up Data</span>
+                        </button>
+                        <button class="cs-action-btn" onclick="viewInvoice()">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>View Invoice</span>
+                        </button>
+                        <button class="cs-action-btn" onclick="openSupport()">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Get Help</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="cs-footer">
+            <div class="cs-footer-content">
+                <div class="cs-footer-brand">
+                    <i class="fas fa-wifi"></i>
+                    <span>ConnectSphere</span>
+                </div>
+                <p>Enterprise WiFi Management Platform</p>
+                <div class="cs-footer-links">
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Support</a>
+                </div>
+                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadDashboardData();
+                initializeCharts();
+            }, 1000);
+        });
+
+        function loadDashboardData() {
+            // Load user data from localStorage
+            const session = JSON.parse(localStorage.getItem('cs_session') || '{}');
+            if (session.email) {
+                document.getElementById('userName').textContent = session.email.split('@')[0];
+            }
+            
+            // Simulate loading data
+            updateConnectionStatus();
+            loadRecentActivity();
+        }
+
+        function initializeCharts() {
+            // Usage Chart
+            const usageCtx = document.getElementById('usageChart').getContext('2d');
+            window.usageChart = new Chart(usageCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Download (GB)',
+                        data: [2.3, 3.1, 2.8, 4.2, 3.7, 2.9, 3.5],
+                        borderColor: '#0066FF',
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Upload (GB)',
+                        data: [0.5, 0.7, 0.6, 0.9, 0.8, 0.7, 0.8],
+                        borderColor: '#00D4AA',
+                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Data Usage (GB)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Speed Chart
+            const speedCtx = document.getElementById('speedChart').getContext('2d');
+            window.speedChart = new Chart(speedCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'],
+                    datasets: [{
+                        label: 'Download Speed (Mbps)',
+                        data: [45, 38, 42, 35, 48, 40],
+                        backgroundColor: 'rgba(0, 102, 255, 0.7)',
+                        borderColor: '#0066FF',
+                        borderWidth: 1
+                    }, {
+                        label: 'Upload Speed (Mbps)',
+                        data: [15, 12, 14, 10, 16, 13],
+                        backgroundColor: 'rgba(0, 212, 170, 0.7)',
+                        borderColor: '#00D4AA',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Speed (Mbps)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const range = document.getElementById('chartRange').value;
+            // Update chart based on selected range
+            console.log('Updating chart for', range, 'days');
+        }
+
+        function updateConnectionStatus() {
+            const session = JSON.parse(localStorage.getItem('cs_session') || '{}');
+            if (session.expires) {
+                const expires = new Date(session.expires);
+                const now = new Date();
+                const diffMs = expires - now;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMins / 60);
+                const remainingMins = diffMins % 60;
+                
+                document.getElementById('sessionExpires').textContent = 
+                    `in ${diffHours}h ${remainingMins}m`;
+                
+                const connectedSince = new Date(now.getTime() - (session.duration * 3600000) + diffMs);
+                document.getElementById('connectedSince').textContent = 
+                    `${connectedSince.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+            }
+        }
+
+        function loadRecentActivity() {
+            const activities = [
+                { time: '10:30 AM', activity: 'Speed Test', details: '45 Mbps download', status: 'Completed' },
+                { time: '9:15 AM', activity: 'Data Top-up', details: 'Added 5 GB', status: 'Successful' },
+                { time: 'Yesterday', activity: 'Invoice Payment', details: 'Invoice #INV-2024-001', status: 'Paid' },
+                { time: '2 days ago', activity: 'Password Change', details: 'Password updated', status: 'Completed' },
+                { time: '3 days ago', activity: 'Support Ticket', details: 'Ticket #TKT-456', status: 'Resolved' }
+            ];
+            
+            const table = document.getElementById('activityTable');
+            table.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.time}</td>
+                    <td>${activity.activity}</td>
+                    <td>${activity.details}</td>
+                    <td><span class="cs-status-badge ${activity.status.toLowerCase()}">${activity.status}</span></td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function runSpeedTest() {
+            alert('Speed test starting...');
+            // Implement speed test logic
+        }
+
+        function topUpData() {
+            window.location.href = 'billing.html#topup';
+        }
+
+        function viewInvoice() {
+            window.location.href = 'billing.html#invoices';
+        }
+
+        function openSupport() {
+            window.location.href = 'tickets.html';
+        }
+
+        function disconnect() {
+            if (confirm('Are you sure you want to disconnect?')) {
+                localStorage.removeItem('cs_session');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('cs_session');
+            window.location.href = 'index.html';
+        });
+    </script>
+
+    <style>
+        /* Dashboard Specific Styles */
+        .cs-dashboard-header {
+            margin-bottom: var(--space-2xl);
+        }
+        
+        .cs-dashboard-header h1 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 2.2rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .cs-dashboard-header p {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+        }
+        
+        .cs-charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-2xl) 0;
+        }
+        
+        .cs-chart-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-chart-header h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--dark);
+        }
+        
+        .cs-chart-header select {
+            padding: var(--space-sm) var(--space-md);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            background: var(--white);
+            color: var(--dark);
+        }
+        
+        .cs-status-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin: var(--space-2xl) 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-status-header h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--dark);
+        }
+        
+        .cs-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .cs-status-indicator.connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .cs-status-indicator.connected i {
+            color: var(--success);
+        }
+        
+        .cs-status-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+        
+        .cs-status-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+        
+        .cs-status-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+        
+        .cs-status-value {
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .cs-recent-activity {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin: var(--space-2xl) 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-recent-activity h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            color: var(--dark);
+        }
+        
+        .cs-activity-table {
+            overflow-x: auto;
+        }
+        
+        .cs-activity-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .cs-activity-table th {
+            text-align: left;
+            padding: var(--space-md);
+            border-bottom: 2px solid var(--gray-200);
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+        
+        .cs-activity-table td {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-600);
+        }
+        
+        .cs-status-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .cs-status-badge.completed,
+        .cs-status-badge.successful,
+        .cs-status-badge.paid,
+        .cs-status-badge.resolved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .cs-quick-actions {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-quick-actions h3 {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            color: var(--dark);
+        }
+        
+        .cs-action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .cs-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-lg);
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            color: var(--dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .cs-action-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-action-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .cs-action-btn span {
+            font-weight: 500;
+        }
+    </style>
+</body>
+</html>
