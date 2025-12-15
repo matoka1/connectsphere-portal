@@ -1023,70 +1023,98 @@
     }
 }
         // WiFi Connection Function
-        async function handleWifiConnection(e) {
-            e.preventDefault();
-            
-            if (!document.getElementById('wifiTerms').checked) {
-                showNotification('Please accept the terms and conditions', 'error');
-                return;
-            }
-            
-            try {
-                // Show connecting state
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
-                submitBtn.disabled = true;
-                
-                // Get MAC address (simulated for production)
-                const macAddress = await getDeviceMacAddress();
-                const ipAddress = await getClientIP();
-                
-                // Prepare connection data
-                const connectionData = {
-                    ...AppState.connectionData,
-                    mac_address: macAddress,
-                    ip_address: ipAddress,
-                    device_info: getDeviceInfo(),
-                    user_id: AppState.user?.id || 'guest',
-                    status: 'pending',
-                    created_at: new Date().toISOString()
-                };
-                
-                // Save to Supabase
-                const { data, error } = await supabase
-                    .from('wifi_connections')
-                    .insert([connectionData])
-                    .select();
-                
-                if (error) throw error;
-                
-                // Process payment based on selected method
-                const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-                await processPayment(paymentMethod, connectionData);
-                
-                // Grant network access (integrate with your router API here)
-                await grantNetworkAccess(macAddress, connectionData.plan);
-                
-                showNotification('Connected successfully! You now have internet access.', 'success');
-                
-                // Update active users count
-                loadActiveUsers();
-                
-                // Close modal and reset
-                setTimeout(() => {
-                    closeModal('wifiModal');
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 2000);
-                
-            } catch (error) {
-                showNotification('Connection failed: ' + error.message, 'error');
-                const submitBtn = e.target.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect Now';
-                submitBtn.disabled = false;
-            }
+       async function handleWifiConnection(e) {
+    e.preventDefault();
+    
+    if (!document.getElementById('wifiTerms').checked) {
+        showNotification('Please accept the terms and conditions', 'error');
+        return;
+    }
+    
+    try {
+        // Show connecting state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+        submitBtn.disabled = true;
+        
+        // Get selected payment method
+        const paymentElement = document.querySelector('input[name="payment"]:checked');
+        const paymentMethod = paymentElement ? paymentElement.value : 'mpesa';
+        
+        // Get selected plan
+        const planElement = document.querySelector('input[name="plan"]:checked');
+        const plan = planElement ? planElement.value : '4';
+        
+        // Get MAC address and IP
+        const macAddress = await getDeviceMacAddress();
+        const ipAddress = await getClientIP();
+        
+        // Calculate amount based on plan
+        const prices = { '1': 0, '4': 100, '8': 180, '24': 300 };
+        const amount = prices[plan] || 100;
+        
+        // Prepare connection data with ALL required fields
+        const connectionData = {
+            name: AppState.connectionData.name,
+            email: AppState.connectionData.email,
+            phone: AppState.connectionData.phone,
+            plan: plan,
+            payment: paymentMethod,
+            payment_method: paymentMethod, // Make sure this is included
+            amount: amount,
+            mac_address: macAddress,
+            ip_address: ipAddress,
+            device_info: getDeviceInfo(),
+            user_id: AppState.user?.id || null,
+            status: 'active',
+            created_at: new Date().toISOString()
+        };
+        
+        console.log('🔵 Connecting with data:', connectionData);
+        
+        // Save to Supabase
+        const { data, error } = await supabase
+            .from('wifi_connections')
+            .insert([connectionData])
+            .select();
+        
+        if (error) {
+            console.error('❌ Database error:', error);
+            throw error;
         }
+        
+        console.log('✅ Connection saved:', data);
+        
+        // Process payment (simulated)
+        await processPayment(paymentMethod, connectionData);
+        
+        // Grant network access (simulated)
+        await grantNetworkAccess(macAddress, plan);
+        
+        showNotification('Connected successfully! You now have internet access.', 'success');
+        
+        // Update active users count
+        loadActiveUsers();
+        
+        // Redirect to dashboard after successful connection
+        setTimeout(() => {
+            closeModal('wifiModal');
+            window.location.href = 'dashboard.html';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ Connection failed:', error);
+        showNotification('Connection failed: ' + error.message, 'error');
+        
+        // Reset button state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-wifi"></i> Connect Now';
+            submitBtn.disabled = false;
+        }
+    }
+}
 
         // Utility Functions
         async function getDeviceMacAddress() {
