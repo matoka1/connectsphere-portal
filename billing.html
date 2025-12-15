@@ -6,6 +6,7 @@
     <title>Billing - ConnectSphere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -22,8 +23,13 @@
         <!-- Navigation -->
         <nav class="cs-navbar">
             <div class="cs-navbar-brand">
-                <i class="fas fa-wifi"></i>
-                <span>ConnectSphere</span>
+                <div class="cs-brand-logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="cs-brand-text">
+                    <h2>ConnectSphere</h2>
+                    <p>Enterprise WiFi</p>
+                </div>
             </div>
             
             <div class="cs-navbar-menu">
@@ -44,12 +50,19 @@
                     <span>Billing</span>
                 </a>
                 <a href="tickets.html" class="cs-nav-item">
-                    <i class="fas fa-ticket-alt"></i>
+                    <i class="fas fa-headset"></i>
                     <span>Support</span>
                 </a>
-                <div class="cs-nav-item dropdown">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
+                
+                <div class="cs-user-menu">
+                    <div class="cs-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="cs-user-info">
+                        <span id="navUserName">Loading...</span>
+                        <span class="cs-user-role">Premium User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
                     <div class="cs-dropdown-menu">
                         <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
                         <a href="#"><i class="fas fa-cog"></i> Settings</a>
@@ -64,1296 +77,1598 @@
         <main class="cs-main-content">
             <div class="cs-container">
                 <!-- Billing Header -->
-                <div class="cs-billing-header">
-                    <h1><i class="fas fa-file-invoice-dollar"></i> Billing & Payments</h1>
-                    <p>Manage your invoices, payments, and billing information</p>
-                </div>
-
-                <!-- Account Balance -->
-                <div class="cs-balance-card">
-                    <div class="cs-balance-info">
-                        <h3>Account Balance</h3>
-                        <div class="cs-balance-amount">
-                            <span class="cs-currency">KES</span>
-                            <span class="cs-amount" id="accountBalance">2,500.00</span>
-                        </div>
-                        <p class="cs-balance-status positive">Credit Balance</p>
+                <div class="cs-dashboard-header">
+                    <div class="cs-header-content">
+                        <h1><i class="fas fa-file-invoice-dollar"></i> Billing & Payments</h1>
+                        <p>Manage your payments, invoices, and billing information</p>
                     </div>
-                    
-                    <div class="cs-balance-actions">
-                        <button class="cs-balance-btn primary" onclick="makePayment()">
-                            <i class="fas fa-credit-card"></i> Make Payment
+                    <div class="cs-header-actions">
+                        <button class="cs-btn cs-btn-primary" onclick="initiateMpesaPayment()">
+                            <i class="fas fa-mobile-alt"></i> Pay via M-Pesa
                         </button>
-                        <button class="cs-balance-btn" onclick="addFunds()">
-                            <i class="fas fa-plus-circle"></i> Add Funds
+                        <button class="cs-btn cs-btn-outline" onclick="exportInvoices()">
+                            <i class="fas fa-download"></i> Export Invoices
                         </button>
                     </div>
                 </div>
 
-                <!-- Billing Tabs -->
-                <div class="cs-billing-tabs">
-                    <div class="cs-tab-headers">
-                        <button class="cs-tab-header active" onclick="showTab('invoices')">
-                            <i class="fas fa-file-invoice"></i> Invoices
-                        </button>
-                        <button class="cs-tab-header" onclick="showTab('payments')">
-                            <i class="fas fa-credit-card"></i> Payments
-                        </button>
-                        <button class="cs-tab-header" onclick="showTab('statements')">
-                            <i class="fas fa-receipt"></i> Statements
-                        </button>
-                        <button class="cs-tab-header" onclick="showTab('methods')">
-                            <i class="fas fa-wallet"></i> Payment Methods
-                        </button>
-                    </div>
-                    
-                    <div class="cs-tab-content">
-                        <!-- Invoices Tab -->
-                        <div id="invoicesTab" class="cs-tab-pane active">
-                            <div class="cs-invoices-header">
-                                <h3>Recent Invoices</h3>
-                                <button class="cs-view-all-btn" onclick="viewAllInvoices()">
-                                    View All Invoices
-                                </button>
+                <!-- Real-time Stats -->
+                <div class="cs-stats-grid">
+                    <div class="cs-stat-card primary">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="accountBalance">KES 0</span>
+                                <span class="cs-stat-trend up">+0%</span>
                             </div>
-                            
-                            <div class="cs-invoices-list">
-                                <div class="cs-invoice-card">
-                                    <div class="cs-invoice-info">
-                                        <div class="cs-invoice-header">
-                                            <h4>Invoice #INV-2024-001</h4>
-                                            <span class="cs-invoice-status paid">Paid</span>
-                                        </div>
-                                        <p class="cs-invoice-date">January 15, 2024</p>
-                                        <div class="cs-invoice-details">
-                                            <span>Premium Internet Plan - Monthly</span>
-                                            <span class="cs-invoice-amount">KES 4,000.00</span>
-                                        </div>
-                                    </div>
-                                    <div class="cs-invoice-actions">
-                                        <button class="cs-invoice-btn" onclick="viewInvoice('INV-2024-001')">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="cs-invoice-btn" onclick="downloadInvoice('INV-2024-001')">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="cs-invoice-card">
-                                    <div class="cs-invoice-info">
-                                        <div class="cs-invoice-header">
-                                            <h4>Invoice #INV-2023-012</h4>
-                                            <span class="cs-invoice-status pending">Pending</span>
-                                        </div>
-                                        <p class="cs-invoice-date">December 15, 2023</p>
-                                        <div class="cs-invoice-details">
-                                            <span>Premium Internet Plan - Monthly</span>
-                                            <span class="cs-invoice-amount">KES 4,000.00</span>
-                                        </div>
-                                    </div>
-                                    <div class="cs-invoice-actions">
-                                        <button class="cs-invoice-btn primary" onclick="payInvoice('INV-2023-012')">
-                                            <i class="fas fa-credit-card"></i> Pay Now
-                                        </button>
-                                        <button class="cs-invoice-btn" onclick="viewInvoice('INV-2023-012')">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                    </div>
-                                </div>
+                            <p class="cs-stat-label">Account Balance</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-calendar"></i> Updated: <span id="balanceUpdated">Just now</span>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="cs-stat-card success">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="lastPayment">KES 0</span>
+                                <span class="cs-stat-trend up">Paid</span>
+                            </div>
+                            <p class="cs-stat-label">Last Payment</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-clock"></i> <span id="lastPaymentDate">Never</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card warning">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="dueInvoices">0</span>
+                                <span class="cs-stat-trend down">Due</span>
+                            </div>
+                            <p class="cs-stat-label">Pending Invoices</p>
+                            <div class="cs-stat-subtext">
+                                Total: <span id="totalDue">KES 0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card info">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <div class="cs-stat-value">
+                                <span id="daysLeft">30</span>
+                                <span class="cs-stat-trend stable">Active</span>
+                            </div>
+                            <p class="cs-stat-label">Billing Cycle</p>
+                            <div class="cs-stat-subtext">
+                                Renews on: <span id="renewalDate">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="cs-quick-actions-panel">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    <div class="cs-action-grid">
+                        <button class="cs-action-card" onclick="topUpAccount()">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="cs-action-content">
+                                <h4>Top Up Account</h4>
+                                <p>Add funds to your account</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
+                        </button>
                         
-                        <!-- Payments Tab -->
-                        <div id="paymentsTab" class="cs-tab-pane">
-                            <div class="cs-payments-header">
-                                <h3>Payment History</h3>
-                                <div class="cs-payments-filter">
-                                    <select id="paymentFilter">
-                                        <option value="all">All Payments</option>
-                                        <option value="month">This Month</option>
-                                        <option value="year">This Year</option>
-                                    </select>
-                                </div>
+                        <button class="cs-action-card" onclick="viewAllInvoices()">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-file-invoice"></i>
                             </div>
-                            
-                            <div class="cs-payments-table">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Transaction ID</th>
-                                            <th>Amount</th>
-                                            <th>Method</th>
-                                            <th>Status</th>
-                                            <th>Invoice</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="paymentsTable">
-                                        <!-- Payments will be loaded here -->
-                                    </tbody>
-                                </table>
+                            <div class="cs-action-content">
+                                <h4>View Invoices</h4>
+                                <p>All billing statements</p>
                             </div>
-                        </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
+                        </button>
                         
-                        <!-- Statements Tab -->
-                        <div id="statementsTab" class="cs-tab-pane">
-                            <div class="cs-statements-header">
-                                <h3>Account Statements</h3>
-                                <button class="cs-generate-btn" onclick="generateStatement()">
-                                    <i class="fas fa-plus"></i> Generate Statement
-                                </button>
+                        <button class="cs-action-card" onclick="setupAutoPay()">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-sync-alt"></i>
                             </div>
-                            
-                            <div class="cs-statements-list">
-                                <div class="cs-statement-card">
-                                    <div class="cs-statement-info">
-                                        <h4>Statement - January 2024</h4>
-                                        <p>Period: Jan 1 - Jan 31, 2024</p>
-                                        <div class="cs-statement-summary">
-                                            <div class="cs-summary-item">
-                                                <span>Total Charges:</span>
-                                                <span>KES 4,000.00</span>
-                                            </div>
-                                            <div class="cs-summary-item">
-                                                <span>Total Payments:</span>
-                                                <span>KES 4,000.00</span>
-                                            </div>
-                                            <div class="cs-summary-item">
-                                                <span>Balance:</span>
-                                                <span class="cs-balance-zero">KES 0.00</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="cs-statement-actions">
-                                        <button class="cs-statement-btn" onclick="viewStatement('jan-2024')">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                        <button class="cs-statement-btn" onclick="downloadStatement('jan-2024')">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="cs-action-content">
+                                <h4>Setup Auto-Pay</h4>
+                                <p>Automatic payments</p>
                             </div>
-                        </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
+                        </button>
                         
-                        <!-- Payment Methods Tab -->
-                        <div id="methodsTab" class="cs-tab-pane">
-                            <div class="cs-methods-header">
-                                <h3>Payment Methods</h3>
-                                <button class="cs-add-method-btn" onclick="addPaymentMethod()">
-                                    <i class="fas fa-plus"></i> Add Payment Method
-                                </button>
+                        <button class="cs-action-card" onclick="addPaymentMethod()">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-credit-card"></i>
                             </div>
-                            
-                            <div class="cs-methods-list">
-                                <div class="cs-method-card">
-                                    <div class="cs-method-info">
-                                        <div class="cs-method-icon">
-                                            <i class="fas fa-mobile-alt"></i>
-                                        </div>
-                                        <div>
-                                            <h4>M-Pesa</h4>
-                                            <p>Phone: 2547********</p>
-                                            <p class="cs-method-default">Default Payment Method</p>
-                                        </div>
-                                    </div>
-                                    <div class="cs-method-actions">
-                                        <button class="cs-method-btn" onclick="editMethod('mpesa')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="cs-method-btn danger" onclick="removeMethod('mpesa')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="cs-method-card">
-                                    <div class="cs-method-info">
-                                        <div class="cs-method-icon">
-                                            <i class="fas fa-credit-card"></i>
-                                        </div>
-                                        <div>
-                                            <h4>Visa Card</h4>
-                                            <p>**** **** **** 1234</p>
-                                            <p>Expires: 12/2025</p>
-                                        </div>
-                                    </div>
-                                    <div class="cs-method-actions">
-                                        <button class="cs-method-btn" onclick="setDefault('visa')">
-                                            <i class="fas fa-star"></i> Set Default
-                                        </button>
-                                        <button class="cs-method-btn" onclick="editMethod('visa')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="cs-action-content">
+                                <h4>Payment Methods</h4>
+                                <p>Manage payment options</p>
                             </div>
-                        </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Upcoming Bills -->
-                <div class="cs-upcoming-bills">
-                    <h3><i class="fas fa-calendar-alt"></i> Upcoming Bills</h3>
-                    
-                    <div class="cs-bills-list">
-                        <div class="cs-bill-item">
-                            <div class="cs-bill-info">
-                                <h4>Monthly Internet Subscription</h4>
-                                <p>Due Date: February 15, 2024</p>
-                            </div>
-                            <div class="cs-bill-amount">
-                                <span>KES 4,000.00</span>
-                            </div>
-                            <div class="cs-bill-actions">
-                                <button class="cs-bill-btn" onclick="setupAutoPay()">
-                                    <i class="fas fa-sync-alt"></i> Setup Auto-Pay
-                                </button>
-                                <button class="cs-bill-btn primary" onclick="payNow()">
-                                    <i class="fas fa-credit-card"></i> Pay Now
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Billing Information -->
-                <div class="cs-billing-info">
-                    <h3><i class="fas fa-info-circle"></i> Billing Information</h3>
-                    
-                    <div class="cs-info-card">
-                        <div class="cs-info-section">
-                            <h4>Contact Information</h4>
-                            <div class="cs-info-item">
-                                <span>Billing Email:</span>
-                                <span id="billingEmail">user@example.com</span>
-                            </div>
-                            <div class="cs-info-item">
-                                <span>Phone Number:</span>
-                                <span id="billingPhone">+254 700 000 000</span>
-                            </div>
-                            <button class="cs-edit-btn" onclick="editBillingInfo()">
-                                <i class="fas fa-edit"></i> Edit
+                <!-- Recent Transactions -->
+                <div class="cs-activity-section">
+                    <div class="cs-recent-activity">
+                        <div class="cs-section-header">
+                            <h3><i class="fas fa-exchange-alt"></i> Recent Transactions</h3>
+                            <button class="cs-btn cs-btn-outline" onclick="loadMoreTransactions()">
+                                View All
                             </button>
                         </div>
-                        
-                        <div class="cs-info-section">
-                            <h4>Billing Address</h4>
-                            <div class="cs-info-item">
-                                <span>Address:</span>
-                                <span id="billingAddress">123 Main Street, Nairobi</span>
-                            </div>
-                            <div class="cs-info-item">
-                                <span>City:</span>
-                                <span id="billingCity">Nairobi</span>
-                            </div>
-                            <div class="cs-info-item">
-                                <span>Postal Code:</span>
-                                <span id="billingPostal">00100</span>
-                            </div>
+                        <div class="cs-activity-timeline" id="transactionsList">
+                            <!-- Transactions will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="cs-alerts-panel">
+                        <div class="cs-section-header">
+                            <h3><i class="fas fa-bell"></i> Payment Reminders</h3>
+                            <span class="cs-alert-badge" id="reminderCount">0</span>
+                        </div>
+                        <div class="cs-alerts-list" id="remindersList">
+                            <!-- Payment reminders will be loaded here -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Payment Modal -->
-                <div id="paymentModal" class="cs-modal">
-                    <div class="cs-modal-content">
-                        <div class="cs-modal-header">
-                            <h3><i class="fas fa-credit-card"></i> Make Payment</h3>
-                            <button class="cs-modal-close" onclick="closePaymentModal()">&times;</button>
+                <!-- M-Pesa Payment Section -->
+                <div class="cs-data-usage-card">
+                    <div class="cs-chart-header">
+                        <h3><i class="fas fa-mobile-alt"></i> M-Pesa Payments</h3>
+                        <div class="cs-payment-info">
+                            <span><i class="fas fa-info-circle"></i> Pay via Lipa Na Dev API</span>
                         </div>
-                        <div class="cs-modal-body">
-                            <div class="cs-payment-form">
-                                <div class="cs-form-group">
-                                    <label>Amount (KES)</label>
-                                    <input type="number" id="paymentAmount" placeholder="0.00" min="1">
-                                </div>
-                                
-                                <div class="cs-form-group">
-                                    <label>Payment Method</label>
-                                    <select id="paymentMethod">
-                                        <option value="mpesa">M-Pesa</option>
-                                        <option value="card">Credit/Debit Card</option>
-                                        <option value="bank">Bank Transfer</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="cs-payment-summary">
-                                    <div class="cs-summary-item">
-                                        <span>Payment Amount:</span>
-                                        <span id="summaryAmount">KES 0.00</span>
-                                    </div>
-                                    <div class="cs-summary-item">
-                                        <span>Transaction Fee:</span>
-                                        <span id="summaryFee">KES 0.00</span>
-                                    </div>
-                                    <div class="cs-summary-item total">
-                                        <span>Total to Pay:</span>
-                                        <span id="summaryTotal">KES 0.00</span>
-                                    </div>
-                                </div>
-                                
-                                <button class="cs-pay-now-btn" onclick="processPayment()">
-                                    <i class="fas fa-lock"></i> Pay Now
-                                </button>
+                    </div>
+                    <div class="cs-payment-form">
+                        <div class="cs-form-row">
+                            <div class="cs-form-group">
+                                <label for="paymentPhone">Phone Number</label>
+                                <input type="tel" id="paymentPhone" placeholder="2547XXXXXXXX" maxlength="12">
+                                <small>Enter your M-Pesa registered phone number</small>
+                            </div>
+                            <div class="cs-form-group">
+                                <label for="paymentAmount">Amount (KES)</label>
+                                <input type="number" id="paymentAmount" placeholder="100" min="10" max="150000">
+                                <small>Minimum: KES 10, Maximum: KES 150,000</small>
                             </div>
                         </div>
+                        <div class="cs-form-row">
+                            <div class="cs-form-group">
+                                <label for="paymentReference">Reference</label>
+                                <input type="text" id="paymentReference" placeholder="e.g., Internet Payment">
+                                <small>Appears on your M-Pesa statement</small>
+                            </div>
+                            <div class="cs-form-group">
+                                <label for="accountNumber">Account Number</label>
+                                <input type="text" id="accountNumber" value="CONNECTSPHERE" readonly>
+                                <small>This is your account number</small>
+                            </div>
+                        </div>
+                        <div class="cs-payment-summary">
+                            <div class="cs-summary-item">
+                                <span>Payment Amount:</span>
+                                <span id="summaryAmount">KES 0</span>
+                            </div>
+                            <div class="cs-summary-item">
+                                <span>Transaction Fee:</span>
+                                <span id="summaryFee">KES 0</span>
+                            </div>
+                            <div class="cs-summary-item total">
+                                <span>Total Amount:</span>
+                                <span id="summaryTotal">KES 0</span>
+                            </div>
+                        </div>
+                        <div class="cs-payment-actions">
+                            <button class="cs-btn cs-btn-primary" onclick="processPayment()" id="payButton">
+                                <i class="fas fa-lock"></i> Pay Now
+                            </button>
+                            <button class="cs-btn cs-btn-outline" onclick="saveAsDraft()">
+                                <i class="fas fa-save"></i> Save Draft
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Invoices -->
+                <div class="cs-speed-test-card">
+                    <div class="cs-chart-header">
+                        <h3><i class="fas fa-file-invoice-dollar"></i> Recent Invoices</h3>
+                        <div class="cs-invoice-filter">
+                            <select id="invoiceFilter" onchange="filterInvoices()">
+                                <option value="all">All Invoices</option>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="cs-invoices-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoicesTable">
+                                <!-- Invoices will be loaded here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </main>
 
+        <!-- Payment Modal -->
+        <div id="paymentModal" class="cs-modal">
+            <div class="cs-modal-content">
+                <div class="cs-modal-header">
+                    <h3><i class="fas fa-mobile-alt"></i> Complete M-Pesa Payment</h3>
+                    <button class="cs-modal-close" onclick="closePaymentModal()">&times;</button>
+                </div>
+                <div class="cs-modal-body">
+                    <div id="paymentSteps">
+                        <div class="cs-payment-step active" id="step1">
+                            <div class="cs-step-header">
+                                <span class="cs-step-number">1</span>
+                                <h4>Payment Details</h4>
+                            </div>
+                            <div class="cs-step-content">
+                                <div class="cs-payment-details">
+                                    <div class="cs-detail-item">
+                                        <span>Phone Number:</span>
+                                        <span id="modalPhone">--</span>
+                                    </div>
+                                    <div class="cs-detail-item">
+                                        <span>Amount:</span>
+                                        <span id="modalAmount">KES 0</span>
+                                    </div>
+                                    <div class="cs-detail-item">
+                                        <span>Reference:</span>
+                                        <span id="modalReference">--</span>
+                                    </div>
+                                </div>
+                                <p class="cs-payment-note">
+                                    <i class="fas fa-info-circle"></i> 
+                                    You will receive an M-Pesa prompt on your phone. Enter your PIN to complete the payment.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-payment-step" id="step2">
+                            <div class="cs-step-header">
+                                <span class="cs-step-number">2</span>
+                                <h4>Processing Payment</h4>
+                            </div>
+                            <div class="cs-step-content">
+                                <div class="cs-processing">
+                                    <div class="cs-loading-spinner"></div>
+                                    <p>Waiting for M-Pesa confirmation...</p>
+                                    <div class="cs-timer" id="paymentTimer">30s</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-payment-step" id="step3">
+                            <div class="cs-step-header">
+                                <span class="cs-step-number">3</span>
+                                <h4>Payment Status</h4>
+                            </div>
+                            <div class="cs-step-content">
+                                <div id="paymentResult">
+                                    <!-- Success or error message will appear here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-modal-footer">
+                        <button class="cs-btn cs-btn-outline" onclick="closePaymentModal()" id="cancelBtn">Cancel</button>
+                        <button class="cs-btn cs-btn-primary" onclick="nextStep()" id="nextBtn">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer -->
         <footer class="cs-footer">
             <div class="cs-footer-content">
-                <div class="cs-footer-brand">
+                <div class="cs-footer-logo">
                     <i class="fas fa-wifi"></i>
                     <span>ConnectSphere</span>
                 </div>
-                <p>Enterprise WiFi Management Platform</p>
                 <div class="cs-footer-links">
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Contact Us</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Contact</a>
                     <a href="#">Support</a>
+                    <a href="#">API</a>
                 </div>
-                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+                <div class="cs-footer-info">
+                    <p>© 2024 ConnectSphere. All rights reserved.</p>
+                    <p class="cs-footer-version">v2.1.4 | Powered by Lipa Na Dev API</p>
+                </div>
             </div>
         </footer>
     </div>
 
     <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://uadbyyaxlieemfaofode.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZGJ5eWF4bGllZW1mYW9mb2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDMyODUsImV4cCI6MjA4MTM3OTI4NX0.Gh3J0GpdQ8yXU-976JNjJKuY6rkBvn3Vkllq2vz37No';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Lipa Na Dev API Configuration
+        const LIPA_NA_DEV_API_KEY = 'lipa_na_dev_api_key_here'; // Replace with your actual API key
+        const LIPA_NA_DEV_BASE_URL = 'https://lipana.dev/proxy';
+        
+        // Global Variables
+        let currentUser = null;
+        let currentStep = 1;
+        let paymentData = {};
+        let paymentTimer = null;
+        let paymentStatusCheck = null;
+
         // Initialize Billing Page
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('💰 Initializing Billing Page...');
+            
+            try {
+                // Check authentication
+                await checkAuth();
+                
+                // Load all billing data
+                await loadBillingData();
+                
+                // Initialize payment form
+                initializePaymentForm();
+                
+                // Set up event listeners
+                setupEventListeners();
+                
+                // Hide loading screen, show app
                 document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('app').style.display = 'block';
-                loadPayments();
-                loadBillingInfo();
-                setupPaymentAmountListener();
-            }, 1000);
+                
+                console.log('✅ Billing page initialized successfully');
+                
+            } catch (error) {
+                console.error('❌ Billing page initialization failed:', error);
+                showError('Failed to load billing page. Please refresh.');
+            }
         });
 
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.cs-tab-pane').forEach(tab => {
-                tab.classList.remove('active');
-            });
+        // Authentication Check
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
             
-            // Remove active class from all headers
-            document.querySelectorAll('.cs-tab-header').forEach(header => {
-                header.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName + 'Tab').classList.add('active');
-            
-            // Activate selected header
-            event.currentTarget.classList.add('active');
-        }
-
-        function loadPayments() {
-            const payments = [
-                { date: '2024-01-15', id: 'TXN-001', amount: '4,000.00', method: 'M-Pesa', status: 'Completed', invoice: 'INV-2024-001' },
-                { date: '2023-12-15', id: 'TXN-002', amount: '4,000.00', method: 'M-Pesa', status: 'Completed', invoice: 'INV-2023-012' },
-                { date: '2023-11-15', id: 'TXN-003', amount: '4,000.00', method: 'Credit Card', status: 'Completed', invoice: 'INV-2023-011' },
-                { date: '2023-10-15', id: 'TXN-004', amount: '2,500.00', method: 'M-Pesa', status: 'Completed', invoice: 'INV-2023-010' },
-                { date: '2023-09-15', id: 'TXN-005', amount: '2,500.00', method: 'Bank Transfer', status: 'Completed', invoice: 'INV-2023-009' }
-            ];
-            
-            const table = document.getElementById('paymentsTable');
-            table.innerHTML = '';
-            
-            payments.forEach(payment => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${payment.date}</td>
-                    <td>${payment.id}</td>
-                    <td>KES ${payment.amount}</td>
-                    <td>${payment.method}</td>
-                    <td><span class="cs-payment-status ${payment.status.toLowerCase()}">${payment.status}</span></td>
-                    <td>${payment.invoice}</td>
-                `;
-                table.appendChild(row);
-            });
-        }
-
-        function loadBillingInfo() {
-            // Load from localStorage or Supabase
-            const session = JSON.parse(localStorage.getItem('cs_session') || '{}');
-            if (session.email) {
-                document.getElementById('billingEmail').textContent = session.email;
-            }
-        }
-
-        function setupPaymentAmountListener() {
-            const amountInput = document.getElementById('paymentAmount');
-            amountInput.addEventListener('input', updatePaymentSummary);
-        }
-
-        function updatePaymentSummary() {
-            const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
-            const fee = amount * 0.015; // 1.5% transaction fee
-            const total = amount + fee;
-            
-            document.getElementById('summaryAmount').textContent = `KES ${amount.toFixed(2)}`;
-            document.getElementById('summaryFee').textContent = `KES ${fee.toFixed(2)}`;
-            document.getElementById('summaryTotal').textContent = `KES ${total.toFixed(2)}`;
-        }
-
-        function makePayment() {
-            document.getElementById('paymentModal').style.display = 'block';
-        }
-
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
-        }
-
-        function processPayment() {
-            const amount = document.getElementById('paymentAmount').value;
-            const method = document.getElementById('paymentMethod').value;
-            
-            if (!amount || amount <= 0) {
-                alert('Please enter a valid amount');
+            if (error || !session) {
+                console.error('❌ No valid session found:', error);
+                window.location.href = 'index.html';
                 return;
             }
             
-            if (confirm(`Process payment of KES ${amount} via ${method}?`)) {
-                alert('Payment initiated! Please complete the payment on the next screen.');
-                closePaymentModal();
-                // In production, redirect to payment gateway
+            currentUser = session.user;
+            console.log('✅ User authenticated:', currentUser.email);
+            
+            // Update user name
+            const userName = currentUser.email.split('@')[0];
+            document.getElementById('navUserName').textContent = userName;
+        }
+
+        // Load Billing Data
+        async function loadBillingData() {
+            console.log('📊 Loading billing data...');
+            
+            if (!currentUser) return;
+            
+            try {
+                // Load account balance
+                await loadAccountBalance();
+                
+                // Load transactions
+                await loadTransactions();
+                
+                // Load invoices
+                await loadInvoices();
+                
+                // Load payment reminders
+                await loadReminders();
+                
+            } catch (error) {
+                console.error('❌ Error loading billing data:', error);
+                showNotification('Failed to load billing data', 'error');
             }
         }
 
-        function addFunds() {
+        // Load Account Balance
+        async function loadAccountBalance() {
+            try {
+                const { data: balanceData, error } = await supabase
+                    .from('account_balance')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') throw error;
+                
+                if (balanceData) {
+                    document.getElementById('accountBalance').textContent = `KES ${balanceData.balance.toLocaleString()}`;
+                    document.getElementById('balanceUpdated').textContent = 
+                        new Date(balanceData.updated_at).toLocaleDateString();
+                }
+                
+                // Load last payment
+                const { data: lastPayment } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (lastPayment) {
+                    document.getElementById('lastPayment').textContent = `KES ${lastPayment.amount.toLocaleString()}`;
+                    document.getElementById('lastPaymentDate').textContent = 
+                        new Date(lastPayment.created_at).toLocaleDateString();
+                }
+                
+                // Load due invoices
+                const { data: dueInvoices } = await supabase
+                    .from('invoices')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('status', 'pending');
+                
+                if (dueInvoices) {
+                    document.getElementById('dueInvoices').textContent = dueInvoices.length;
+                    const totalDue = dueInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+                    document.getElementById('totalDue').textContent = `KES ${totalDue.toLocaleString()}`;
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading account balance:', error);
+            }
+        }
+
+        // Load Transactions
+        async function loadTransactions() {
+            try {
+                const { data: transactions, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                const transactionsList = document.getElementById('transactionsList');
+                transactionsList.innerHTML = '';
+                
+                if (!transactions || transactions.length === 0) {
+                    transactionsList.innerHTML = `
+                        <div class="cs-activity-item">
+                            <p style="color: var(--gray-500); text-align: center;">No transactions yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                transactions.forEach(transaction => {
+                    const item = document.createElement('div');
+                    item.className = 'cs-activity-item';
+                    
+                    const timeStr = formatTimeAgo(new Date(transaction.created_at));
+                    const typeIcon = transaction.type === 'credit' ? 'fa-arrow-down' : 'fa-arrow-up';
+                    const typeColor = transaction.type === 'credit' ? 'success' : 'danger';
+                    
+                    item.innerHTML = `
+                        <div class="cs-activity-time">${timeStr}</div>
+                        <div class="cs-activity-title">
+                            <i class="fas ${typeIcon} text-${typeColor}"></i> 
+                            ${transaction.description}
+                        </div>
+                        <div class="cs-activity-desc">
+                            Amount: KES ${transaction.amount.toLocaleString()} | 
+                            Status: <span class="status-${transaction.status}">${transaction.status}</span>
+                        </div>
+                    `;
+                    
+                    transactionsList.appendChild(item);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading transactions:', error);
+            }
+        }
+
+        // Load Invoices
+        async function loadInvoices() {
+            try {
+                const { data: invoices, error } = await supabase
+                    .from('invoices')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                const invoicesTable = document.getElementById('invoicesTable');
+                invoicesTable.innerHTML = '';
+                
+                if (!invoices || invoices.length === 0) {
+                    invoicesTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--gray-500);">
+                                No invoices found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    
+                    const statusClass = `status-${invoice.status}`;
+                    const statusText = invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1);
+                    
+                    row.innerHTML = `
+                        <td>${invoice.invoice_number}</td>
+                        <td>${new Date(invoice.created_at).toLocaleDateString()}</td>
+                        <td>${invoice.description}</td>
+                        <td>KES ${invoice.amount.toLocaleString()}</td>
+                        <td><span class="${statusClass}">${statusText}</span></td>
+                        <td>
+                            <button class="cs-btn cs-btn-sm" onclick="viewInvoice('${invoice.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${invoice.status === 'pending' ? 
+                                `<button class="cs-btn cs-btn-sm cs-btn-primary" onclick="payInvoice('${invoice.id}')">
+                                    <i class="fas fa-credit-card"></i>
+                                </button>` : 
+                                ''
+                            }
+                        </td>
+                    `;
+                    
+                    invoicesTable.appendChild(row);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading invoices:', error);
+            }
+        }
+
+        // Load Payment Reminders
+        async function loadReminders() {
+            try {
+                const { data: reminders, error } = await supabase
+                    .from('payment_reminders')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('status', 'active')
+                    .order('due_date', { ascending: true });
+                
+                if (error) throw error;
+                
+                const remindersList = document.getElementById('remindersList');
+                const reminderCount = document.getElementById('reminderCount');
+                
+                remindersList.innerHTML = '';
+                
+                if (!reminders || reminders.length === 0) {
+                    remindersList.innerHTML = `
+                        <div class="cs-alert-item">
+                            <p style="color: var(--gray-500);">No payment reminders</p>
+                        </div>
+                    `;
+                    reminderCount.textContent = '0';
+                    return;
+                }
+                
+                reminderCount.textContent = reminders.length;
+                
+                reminders.forEach(reminder => {
+                    const item = document.createElement('div');
+                    item.className = 'cs-alert-item';
+                    
+                    const daysLeft = Math.ceil((new Date(reminder.due_date) - new Date()) / (1000 * 60 * 60 * 24));
+                    const severity = daysLeft <= 1 ? 'high' : daysLeft <= 3 ? 'medium' : 'low';
+                    
+                    item.innerHTML = `
+                        <i class="fas fa-calendar-exclamation cs-alert-icon"></i>
+                        <div class="cs-alert-content">
+                            <h4>${reminder.title}</h4>
+                            <p>${reminder.description} - Due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}</p>
+                        </div>
+                    `;
+                    
+                    remindersList.appendChild(item);
+                });
+                
+            } catch (error) {
+                console.error('❌ Error loading reminders:', error);
+            }
+        }
+
+        // Initialize Payment Form
+        function initializePaymentForm() {
+            const amountInput = document.getElementById('paymentAmount');
+            amountInput.addEventListener('input', updatePaymentSummary);
+            
+            // Set default phone number from user profile
+            const phoneInput = document.getElementById('paymentPhone');
+            phoneInput.value = '2547'; // Default Kenya prefix
+        }
+
+        // Update Payment Summary
+        function updatePaymentSummary() {
+            const amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            const fee = calculateTransactionFee(amount);
+            const total = amount + fee;
+            
+            document.getElementById('summaryAmount').textContent = `KES ${amount.toLocaleString()}`;
+            document.getElementById('summaryFee').textContent = `KES ${fee.toLocaleString()}`;
+            document.getElementById('summaryTotal').textContent = `KES ${total.toLocaleString()}`;
+        }
+
+        // Calculate Transaction Fee (M-Pesa rates)
+        function calculateTransactionFee(amount) {
+            if (amount <= 100) return 0;
+            if (amount <= 500) return 10;
+            if (amount <= 1000) return 25;
+            if (amount <= 5000) return 50;
+            if (amount <= 15000) return 75;
+            if (amount <= 30000) return 100;
+            if (amount <= 45000) return 125;
+            if (amount <= 60000) return 150;
+            if (amount <= 75000) return 175;
+            if (amount <= 90000) return 200;
+            if (amount <= 100000) return 225;
+            if (amount <= 150000) return 250;
+            return 300; // Maximum fee
+        }
+
+        // Process Payment via Lipa Na Dev API
+        async function processPayment() {
+            // Get payment details
+            const phone = document.getElementById('paymentPhone').value.trim();
+            const amount = parseFloat(document.getElementById('paymentAmount').value);
+            const reference = document.getElementById('paymentReference').value.trim() || 'ConnectSphere Payment';
+            
+            // Validate inputs
+            if (!phone || phone.length !== 12 || !phone.startsWith('254')) {
+                showNotification('Please enter a valid M-Pesa phone number (2547XXXXXXXX)', 'error');
+                return;
+            }
+            
+            if (!amount || amount < 10 || amount > 150000) {
+                showNotification('Amount must be between KES 10 and KES 150,000', 'error');
+                return;
+            }
+            
+            if (!reference) {
+                showNotification('Please enter a payment reference', 'error');
+                return;
+            }
+            
+            // Prepare payment data
+            paymentData = {
+                phone,
+                amount,
+                reference,
+                timestamp: Date.now(),
+                status: 'initiated'
+            };
+            
+            // Show payment modal
+            showPaymentModal();
+        }
+
+        // Show Payment Modal
+        function showPaymentModal() {
+            // Update modal with payment details
+            document.getElementById('modalPhone').textContent = paymentData.phone;
+            document.getElementById('modalAmount').textContent = `KES ${paymentData.amount.toLocaleString()}`;
+            document.getElementById('modalReference').textContent = paymentData.reference;
+            
+            // Reset to step 1
+            currentStep = 1;
+            updatePaymentSteps();
+            
+            // Show modal
+            document.getElementById('paymentModal').style.display = 'block';
+        }
+
+        // Close Payment Modal
+        function closePaymentModal() {
+            // Clear any timers
+            if (paymentTimer) clearInterval(paymentTimer);
+            if (paymentStatusCheck) clearInterval(paymentStatusCheck);
+            
+            // Hide modal
+            document.getElementById('paymentModal').style.display = 'none';
+            
+            // Reset form
+            resetPaymentForm();
+        }
+
+        // Update Payment Steps
+        function updatePaymentSteps() {
+            // Hide all steps
+            document.querySelectorAll('.cs-payment-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            
+            // Update buttons
+            const cancelBtn = document.getElementById('cancelBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (currentStep === 1) {
+                cancelBtn.textContent = 'Cancel';
+                nextBtn.textContent = 'Continue';
+                nextBtn.onclick = initiatePayment;
+            } else if (currentStep === 2) {
+                cancelBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            } else if (currentStep === 3) {
+                cancelBtn.textContent = 'Close';
+                cancelBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+            }
+        }
+
+        // Initiate Payment via Lipa Na Dev API
+        async function initiatePayment() {
+            // Move to step 2
+            currentStep = 2;
+            updatePaymentSteps();
+            
+            // Start timer
+            let timeLeft = 30;
+            paymentTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('paymentTimer').textContent = `${timeLeft}s`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(paymentTimer);
+                    handlePaymentTimeout();
+                }
+            }, 1000);
+            
+            try {
+                // Call Lipa Na Dev API
+                const response = await fetch(`${LIPA_NA_DEV_BASE_URL}/mpesa/stkpush`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${LIPA_NA_DEV_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        phone: paymentData.phone,
+                        amount: paymentData.amount,
+                        reference: paymentData.reference,
+                        callback_url: `${window.location.origin}/api/payment-callback`,
+                        account_number: 'CONNECTSPHERE'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    paymentData.transactionId = result.transaction_id;
+                    paymentData.status = 'pending';
+                    
+                    // Start checking payment status
+                    checkPaymentStatus();
+                    
+                } else {
+                    throw new Error(result.message || 'Payment initiation failed');
+                }
+                
+            } catch (error) {
+                console.error('❌ Payment initiation error:', error);
+                showPaymentResult(false, error.message || 'Payment failed. Please try again.');
+            }
+        }
+
+        // Check Payment Status
+        async function checkPaymentStatus() {
+            if (!paymentData.transactionId) return;
+            
+            paymentStatusCheck = setInterval(async () => {
+                try {
+                    // Check payment status via Lipa Na Dev API
+                    const response = await fetch(`${LIPA_NA_DEV_BASE_URL}/mpesa/transaction/${paymentData.transactionId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${LIPA_NA_DEV_API_KEY}`
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Status check failed');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        // Payment successful
+                        clearInterval(paymentStatusCheck);
+                        clearInterval(paymentTimer);
+                        paymentData.status = 'completed';
+                        
+                        // Save payment to database
+                        await savePaymentToDatabase();
+                        
+                        // Show success
+                        showPaymentResult(true, 'Payment completed successfully!');
+                        
+                    } else if (result.status === 'failed') {
+                        // Payment failed
+                        clearInterval(paymentStatusCheck);
+                        clearInterval(paymentTimer);
+                        paymentData.status = 'failed';
+                        
+                        showPaymentResult(false, 'Payment was cancelled or failed.');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Status check error:', error);
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        // Handle Payment Timeout
+        function handlePaymentTimeout() {
+            if (paymentStatusCheck) clearInterval(paymentStatusCheck);
+            
+            showPaymentResult(false, 'Payment request timed out. Please try again.');
+        }
+
+        // Show Payment Result
+        function showPaymentResult(success, message) {
+            currentStep = 3;
+            updatePaymentSteps();
+            
+            const resultDiv = document.getElementById('paymentResult');
+            
+            if (success) {
+                resultDiv.innerHTML = `
+                    <div class="cs-payment-success">
+                        <div class="cs-success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4>Payment Successful!</h4>
+                        <p>${message}</p>
+                        <div class="cs-receipt-details">
+                            <div class="cs-receipt-item">
+                                <span>Transaction ID:</span>
+                                <span>${paymentData.transactionId || 'N/A'}</span>
+                            </div>
+                            <div class="cs-receipt-item">
+                                <span>Amount:</span>
+                                <span>KES ${paymentData.amount.toLocaleString()}</span>
+                            </div>
+                            <div class="cs-receipt-item">
+                                <span>Date:</span>
+                                <span>${new Date().toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <button class="cs-btn cs-btn-primary" onclick="downloadReceipt()">
+                            <i class="fas fa-download"></i> Download Receipt
+                        </button>
+                    </div>
+                `;
+                
+                // Refresh billing data
+                setTimeout(() => {
+                    loadBillingData();
+                }, 2000);
+                
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="cs-payment-error">
+                        <div class="cs-error-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <h4>Payment Failed</h4>
+                        <p>${message}</p>
+                        <p style="color: var(--gray-600); margin-top: 1rem;">
+                            Please check your M-Pesa balance and try again.
+                        </p>
+                        <button class="cs-btn cs-btn-outline" onclick="retryPayment()">
+                            <i class="fas fa-redo"></i> Retry Payment
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Save Payment to Database
+        async function savePaymentToDatabase() {
+            try {
+                // Save to transactions table
+                const { error: txError } = await supabase
+                    .from('transactions')
+                    .insert([{
+                        user_id: currentUser.id,
+                        type: 'credit',
+                        amount: paymentData.amount,
+                        description: paymentData.reference,
+                        status: 'completed',
+                        reference: paymentData.transactionId,
+                        metadata: {
+                            phone: paymentData.phone,
+                            method: 'mpesa',
+                            fee: calculateTransactionFee(paymentData.amount)
+                        }
+                    }]);
+                
+                if (txError) throw txError;
+                
+                // Update account balance
+                const { data: currentBalance } = await supabase
+                    .from('account_balance')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (currentBalance) {
+                    const newBalance = currentBalance.balance + paymentData.amount;
+                    await supabase
+                        .from('account_balance')
+                        .update({
+                            balance: newBalance,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('user_id', currentUser.id);
+                } else {
+                    await supabase
+                        .from('account_balance')
+                        .insert([{
+                            user_id: currentUser.id,
+                            balance: paymentData.amount,
+                            updated_at: new Date().toISOString()
+                        }]);
+                }
+                
+                // Send payment notification
+                await supabase
+                    .from('notifications')
+                    .insert([{
+                        user_id: currentUser.id,
+                        title: 'Payment Received',
+                        message: `KES ${paymentData.amount.toLocaleString()} has been credited to your account`,
+                        type: 'payment',
+                        status: 'unread'
+                    }]);
+                
+                console.log('✅ Payment saved to database');
+                
+            } catch (error) {
+                console.error('❌ Error saving payment:', error);
+            }
+        }
+
+        // Reset Payment Form
+        function resetPaymentForm() {
             document.getElementById('paymentAmount').value = '';
-            makePayment();
+            document.getElementById('paymentReference').value = '';
+            updatePaymentSummary();
+        }
+
+        // Helper Functions
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        function showNotification(message, type = 'info') {
+            const notificationCenter = document.getElementById('notificationCenter');
+            
+            if (!notificationCenter) {
+                // Create notification center if it doesn't exist
+                const nc = document.createElement('div');
+                nc.id = 'notificationCenter';
+                nc.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                `;
+                document.body.appendChild(nc);
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                padding: 16px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 300px;
+                animation: slideInRight 0.3s ease;
+                border-left: 4px solid ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+            `;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon}" style="color: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'}"></i>
+                <div style="flex: 1;">
+                    <p style="margin: 0; font-weight: 600;">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: #6B7280; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.getElementById('notificationCenter').appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function showError(message) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.innerHTML = `
+                <div class="cs-loading-content">
+                    <div style="color: #EF4444; font-size: 3rem; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h2>Billing Error</h2>
+                    <p>${message}</p>
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #0066FF; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        Refresh Page
+                    </button>
+                </div>
+            `;
+        }
+
+        // Other Functions
+        function topUpAccount() {
+            document.getElementById('paymentAmount').focus();
         }
 
         function viewAllInvoices() {
-            alert('Showing all invoices...');
-        }
-
-        function viewInvoice(invoiceId) {
-            alert(`Viewing invoice ${invoiceId}`);
-        }
-
-        function downloadInvoice(invoiceId) {
-            alert(`Downloading invoice ${invoiceId}`);
-        }
-
-        function payInvoice(invoiceId) {
-            document.getElementById('paymentAmount').value = '4000';
-            makePayment();
-        }
-
-        function generateStatement() {
-            alert('Generating account statement...');
-        }
-
-        function viewStatement(period) {
-            alert(`Viewing statement for ${period}`);
-        }
-
-        function downloadStatement(period) {
-            alert(`Downloading statement for ${period}`);
-        }
-
-        function addPaymentMethod() {
-            alert('Add payment method functionality coming soon!');
-        }
-
-        function editMethod(methodId) {
-            alert(`Editing ${methodId} payment method`);
-        }
-
-        function removeMethod(methodId) {
-            if (confirm(`Remove ${methodId} payment method?`)) {
-                alert(`${methodId} payment method removed`);
-            }
-        }
-
-        function setDefault(methodId) {
-            alert(`${methodId} set as default payment method`);
+            showNotification('Loading all invoices...', 'info');
+            // In production, this would load a paginated list
         }
 
         function setupAutoPay() {
-            if (confirm('Setup automatic payments for all future bills?')) {
-                alert('Auto-pay setup successfully!');
+            if (confirm('Set up automatic payments for your monthly bills?')) {
+                showNotification('Auto-pay setup initiated. Please complete the setup.', 'info');
             }
         }
 
-        function payNow() {
-            document.getElementById('paymentAmount').value = '4000';
-            makePayment();
+        function addPaymentMethod() {
+            showNotification('Adding new payment method...', 'info');
         }
 
-        function editBillingInfo() {
-            alert('Edit billing information functionality coming soon!');
+        function loadMoreTransactions() {
+            showNotification('Loading more transactions...', 'info');
         }
 
-        // Logout function
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        function viewInvoice(invoiceId) {
+            showNotification(`Viewing invoice ${invoiceId}`, 'info');
+        }
+
+        function payInvoice(invoiceId) {
+            showNotification(`Processing payment for invoice ${invoiceId}`, 'info');
+        }
+
+        function filterInvoices() {
+            const filter = document.getElementById('invoiceFilter').value;
+            showNotification(`Filtering invoices: ${filter}`, 'info');
+        }
+
+        function initiateMpesaPayment() {
+            document.getElementById('paymentPhone').focus();
+        }
+
+        function exportInvoices() {
+            showNotification('Exporting invoices...', 'info');
+        }
+
+        function retryPayment() {
+            closePaymentModal();
+            processPayment();
+        }
+
+        function downloadReceipt() {
+            showNotification('Downloading receipt...', 'success');
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Close modal when clicking outside
+            document.getElementById('paymentModal').addEventListener('click', (e) => {
+                if (e.target.id === 'paymentModal') {
+                    closePaymentModal();
+                }
+            });
+        }
+
+        // Handle Logout
+        async function handleLogout(e) {
             e.preventDefault();
-            localStorage.removeItem('cs_session');
-            window.location.href = 'index.html';
+            
+            try {
+                await supabase.auth.signOut();
+                localStorage.removeItem('cs_session');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                showNotification('Logout failed. Please try again.', 'error');
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePaymentModal();
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                initiateMpesaPayment();
+            }
         });
     </script>
 
     <style>
-        /* Billing Page Specific Styles */
-        .cs-billing-header {
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .cs-billing-header h1 {
-            display: flex;
+        /* Payment Modal Styles */
+        .cs-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
             align-items: center;
-            gap: var(--space-sm);
-            font-size: 2.2rem;
-            margin-bottom: var(--space-sm);
+            justify-content: center;
         }
         
-        /* Balance Card */
-        .cs-balance-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: var(--radius-xl);
-            padding: var(--space-2xl);
-            color: var(--white);
-            margin-bottom: var(--space-2xl);
+        .cs-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cs-modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
         }
         
-        .cs-balance-info h3 {
-            font-size: 1.2rem;
-            margin-bottom: var(--space-sm);
-            opacity: 0.9;
-        }
-        
-        .cs-balance-amount {
-            display: flex;
-            align-items: baseline;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-sm);
-        }
-        
-        .cs-currency {
-            font-size: 1.5rem;
-            opacity: 0.9;
-        }
-        
-        .cs-amount {
-            font-size: 3rem;
-            font-weight: 700;
-        }
-        
-        .cs-balance-status {
-            font-size: 0.9rem;
-            padding: var(--space-xs) var(--space-sm);
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: var(--radius-full);
-            display: inline-block;
-        }
-        
-        .cs-balance-status.positive {
-            background: rgba(16, 185, 129, 0.3);
-        }
-        
-        .cs-balance-status.negative {
-            background: rgba(239, 68, 68, 0.3);
-        }
-        
-        .cs-balance-actions {
-            display: flex;
-            gap: var(--space-md);
-        }
-        
-        .cs-balance-btn {
-            padding: var(--space-md) var(--space-xl);
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--radius);
-            color: var(--white);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
+        .cs-modal-header h3 {
+            margin: 0;
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
+            gap: 10px;
         }
         
-        .cs-balance-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .cs-balance-btn.primary {
-            background: var(--white);
-            color: var(--primary);
-            border-color: var(--white);
-        }
-        
-        .cs-balance-btn.primary:hover {
-            background: var(--gray-100);
-        }
-        
-        /* Billing Tabs */
-        .cs-billing-tabs {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow);
-            margin-bottom: var(--space-2xl);
-            overflow: hidden;
-        }
-        
-        .cs-tab-headers {
-            display: flex;
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-        }
-        
-        .cs-tab-header {
-            flex: 1;
-            padding: var(--space-lg);
+        .cs-modal-close {
             background: none;
             border: none;
-            border-bottom: 3px solid transparent;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--gray-600);
+            font-size: 24px;
             cursor: pointer;
-            transition: all 0.2s;
+            color: #6B7280;
+        }
+        
+        .cs-modal-body {
+            padding: 24px;
+        }
+        
+        .cs-modal-footer {
+            padding: 24px;
+            border-top: 1px solid #E5E7EB;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--space-sm);
+            gap: 12px;
+            justify-content: flex-end;
         }
         
-        .cs-tab-header:hover {
-            background: var(--gray-100);
-            color: var(--primary);
-        }
-        
-        .cs-tab-header.active {
-            background: var(--white);
-            border-bottom-color: var(--primary);
-            color: var(--primary);
-        }
-        
-        .cs-tab-content {
-            padding: var(--space-xl);
-        }
-        
-        .cs-tab-pane {
+        /* Payment Steps */
+        .cs-payment-step {
             display: none;
         }
         
-        .cs-tab-pane.active {
+        .cs-payment-step.active {
             display: block;
         }
         
-        /* Invoices Tab */
-        .cs-invoices-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .cs-invoices-header h3 {
-            color: var(--dark);
-        }
-        
-        .cs-view-all-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .cs-view-all-btn:hover {
-            background: var(--gray-200);
-        }
-        
-        .cs-invoices-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-        
-        .cs-invoice-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--space-lg);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            transition: all 0.2s;
-        }
-        
-        .cs-invoice-card:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-        
-        .cs-invoice-info {
-            flex: 1;
-        }
-        
-        .cs-invoice-header {
+        .cs-step-header {
             display: flex;
             align-items: center;
-            gap: var(--space-md);
-            margin-bottom: var(--space-xs);
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
-        .cs-invoice-header h4 {
-            font-size: 1.1rem;
-            color: var(--dark);
-        }
-        
-        .cs-invoice-status {
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-full);
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .cs-invoice-status.paid {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-        
-        .cs-invoice-status.pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .cs-invoice-status.overdue {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        .cs-invoice-date {
-            color: var(--gray-600);
-            font-size: 0.9rem;
-            margin-bottom: var(--space-sm);
-        }
-        
-        .cs-invoice-details {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .cs-invoice-amount {
-            font-weight: 600;
-            color: var(--dark);
-        }
-        
-        .cs-invoice-actions {
-            display: flex;
-            gap: var(--space-sm);
-        }
-        
-        .cs-invoice-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-invoice-btn:hover {
-            background: var(--gray-200);
-        }
-        
-        .cs-invoice-btn.primary {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
-        }
-        
-        .cs-invoice-btn.primary:hover {
-            background: var(--primary-dark);
-        }
-        
-        /* Payments Tab */
-        .cs-payments-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .cs-payments-filter select {
-            padding: var(--space-sm) var(--space-md);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            background: var(--white);
-            color: var(--dark);
-        }
-        
-        .cs-payments-table {
-            overflow-x: auto;
-        }
-        
-        .cs-payments-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .cs-payments-table th {
-            text-align: left;
-            padding: var(--space-md);
-            border-bottom: 2px solid var(--gray-200);
-            color: var(--gray-700);
-            font-weight: 600;
-        }
-        
-        .cs-payments-table td {
-            padding: var(--space-md);
-            border-bottom: 1px solid var(--gray-100);
-            color: var(--gray-600);
-        }
-        
-        .cs-payment-status {
-            padding: var(--space-xs) var(--space-sm);
-            border-radius: var(--radius-full);
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        
-        .cs-payment-status.completed {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-        
-        .cs-payment-status.pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .cs-payment-status.failed {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        /* Statements Tab */
-        .cs-statements-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .cs-generate-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: var(--radius);
-            color: var(--white);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-generate-btn:hover {
-            background: var(--primary-dark);
-        }
-        
-        .cs-statements-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-        
-        .cs-statement-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--space-lg);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-        }
-        
-        .cs-statement-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-xs);
-            color: var(--dark);
-        }
-        
-        .cs-statement-info p {
-            color: var(--gray-600);
-            font-size: 0.9rem;
-            margin-bottom: var(--space-sm);
-        }
-        
-        .cs-statement-summary {
-            display: flex;
-            gap: var(--space-lg);
-        }
-        
-        .cs-summary-item {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-xs);
-        }
-        
-        .cs-summary-item span:first-child {
-            font-size: 0.9rem;
-            color: var(--gray-600);
-        }
-        
-        .cs-summary-item span:last-child {
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        .cs-balance-zero {
-            color: var(--success) !important;
-        }
-        
-        .cs-statement-actions {
-            display: flex;
-            gap: var(--space-sm);
-        }
-        
-        .cs-statement-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-statement-btn:hover {
-            background: var(--gray-200);
-        }
-        
-        /* Payment Methods Tab */
-        .cs-methods-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .cs-add-method-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--primary);
-            border: 1px solid var(--primary);
-            border-radius: var(--radius);
-            color: var(--white);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-add-method-btn:hover {
-            background: var(--primary-dark);
-        }
-        
-        .cs-methods-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-        
-        .cs-method-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: var(--space-lg);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-        }
-        
-        .cs-method-info {
-            display: flex;
-            align-items: center;
-            gap: var(--space-lg);
-        }
-        
-        .cs-method-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--primary-light);
-            border-radius: var(--radius);
+        .cs-step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #0066FF;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            color: var(--primary);
+            font-weight: bold;
         }
         
-        .cs-method-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-xs);
-            color: var(--dark);
+        .cs-step-header h4 {
+            margin: 0;
+            color: #1F2937;
         }
         
-        .cs-method-info p {
-            color: var(--gray-600);
-            font-size: 0.9rem;
-            margin-bottom: var(--space-xs);
+        .cs-step-content {
+            margin-left: 42px;
         }
         
-        .cs-method-default {
-            color: var(--success) !important;
-            font-weight: 500;
+        .cs-payment-details {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
         }
         
-        .cs-method-actions {
-            display: flex;
-            gap: var(--space-sm);
-        }
-        
-        .cs-method-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-method-btn:hover {
-            background: var(--gray-200);
-        }
-        
-        .cs-method-btn.danger {
-            color: var(--danger);
-            border-color: var(--danger);
-        }
-        
-        .cs-method-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.1);
-        }
-        
-        /* Upcoming Bills */
-        .cs-upcoming-bills {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow);
-            margin-bottom: var(--space-2xl);
-        }
-        
-        .cs-upcoming-bills h3 {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-xl);
-            color: var(--dark);
-        }
-        
-        .cs-bills-list {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-        
-        .cs-bill-item {
+        .cs-detail-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: var(--space-lg);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
+            margin-bottom: 10px;
         }
         
-        .cs-bill-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-xs);
-            color: var(--dark);
+        .cs-detail-item:last-child {
+            margin-bottom: 0;
         }
         
-        .cs-bill-info p {
-            color: var(--gray-600);
-            font-size: 0.9rem;
+        .cs-payment-note {
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+            padding: 12px;
+            border-radius: 4px;
+            color: #92400E;
+            font-size: 14px;
         }
         
-        .cs-bill-amount span {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--dark);
+        .cs-payment-note i {
+            margin-right: 8px;
         }
         
-        .cs-bill-actions {
-            display: flex;
-            gap: var(--space-sm);
+        /* Processing Animation */
+        .cs-processing {
+            text-align: center;
+            padding: 40px 20px;
         }
         
-        .cs-bill-btn {
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
+        .cs-processing .cs-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #E5E7EB;
+            border-top-color: #0066FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
         
-        .cs-bill-btn:hover {
-            background: var(--gray-200);
+        .cs-processing p {
+            color: #6B7280;
+            margin-bottom: 10px;
         }
         
-        .cs-bill-btn.primary {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
+        .cs-timer {
+            font-size: 14px;
+            color: #9CA3AF;
         }
         
-        .cs-bill-btn.primary:hover {
-            background: var(--primary-dark);
+        /* Payment Results */
+        .cs-payment-success, .cs-payment-error {
+            text-align: center;
+            padding: 20px;
         }
         
-        /* Billing Information */
-        .cs-billing-info {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow);
+        .cs-success-icon, .cs-error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
         }
         
-        .cs-billing-info h3 {
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-xl);
-            color: var(--dark);
+        .cs-success-icon {
+            color: #10B981;
         }
         
-        .cs-info-card {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-2xl);
+        .cs-error-icon {
+            color: #EF4444;
         }
         
-        .cs-info-section {
-            position: relative;
+        .cs-receipt-details {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
         }
         
-        .cs-info-section h4 {
-            font-size: 1.1rem;
-            margin-bottom: var(--space-lg);
-            color: var(--dark);
-        }
-        
-        .cs-info-item {
+        .cs-receipt-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: var(--space-md);
-            padding-bottom: var(--space-md);
-            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 10px;
         }
         
-        .cs-info-item span:first-child {
-            color: var(--gray-600);
-            font-weight: 500;
-        }
-        
-        .cs-info-item span:last-child {
-            color: var(--dark);
-        }
-        
-        .cs-edit-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: var(--space-sm) var(--space-md);
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--radius);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: var(--space-xs);
-        }
-        
-        .cs-edit-btn:hover {
-            background: var(--gray-200);
+        .cs-receipt-item:last-child {
+            margin-bottom: 0;
         }
         
         /* Payment Form */
         .cs-payment-form {
-            max-width: 500px;
-            margin: 0 auto;
+            margin-top: 20px;
+        }
+        
+        .cs-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .cs-form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .cs-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .cs-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .cs-form-group input, .cs-form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .cs-form-group input:focus {
+            outline: none;
+            border-color: #0066FF;
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #6B7280;
+            font-size: 12px;
         }
         
         .cs-payment-summary {
-            background: var(--gray-50);
-            border-radius: var(--radius);
-            padding: var(--space-lg);
-            margin: var(--space-xl) 0;
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
         }
         
         .cs-summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: var(--space-md);
+            margin-bottom: 10px;
         }
         
         .cs-summary-item.total {
-            border-top: 2px solid var(--gray-200);
-            padding-top: var(--space-md);
-            margin-top: var(--space-md);
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--dark);
+            border-top: 1px solid #D1D5DB;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #1F2937;
         }
         
-        .cs-pay-now-btn {
+        .cs-payment-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        /* Invoices Table */
+        .cs-invoices-table {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        
+        .cs-invoices-table table {
             width: 100%;
-            padding: var(--space-lg);
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: var(--radius);
-            font-size: 1.1rem;
+            border-collapse: collapse;
+        }
+        
+        .cs-invoices-table th {
+            text-align: left;
+            padding: 12px;
+            background: #F9FAFB;
+            border-bottom: 2px solid #E5E7EB;
+            color: #374151;
             font-weight: 600;
-            cursor: pointer;
+        }
+        
+        .cs-invoices-table td {
+            padding: 12px;
+            border-bottom: 1px solid #E5E7EB;
+            color: #4B5563;
+        }
+        
+        .cs-invoices-table .status-pending {
+            color: #F59E0B;
+            background: #FEF3C7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .cs-invoices-table .status-paid {
+            color: #10B981;
+            background: #D1FAE5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .cs-invoices-table .status-overdue {
+            color: #EF4444;
+            background: #FEE2E2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .cs-invoice-filter select {
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            color: #374151;
+        }
+        
+        /* Payment Info */
+        .cs-payment-info {
+            font-size: 14px;
+            color: #6B7280;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: var(--space-sm);
+            gap: 5px;
+        }
+        
+        /* Spinner Animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Status Colors */
+        .text-success { color: #10B981; }
+        .text-danger { color: #EF4444; }
+        .status-completed { color: #10B981; }
+        .status-pending { color: #F59E0B; }
+        .status-failed { color: #EF4444; }
+        
+        /* Button Styles */
+        .cs-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             transition: all 0.2s;
         }
         
-        .cs-pay-now-btn:hover {
-            background: var(--primary-dark);
+        .cs-btn-primary {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .cs-btn-primary:hover {
+            background: #0052D4;
+        }
+        
+        .cs-btn-outline {
+            background: white;
+            color: #0066FF;
+            border: 2px solid #0066FF;
+        }
+        
+        .cs-btn-outline:hover {
+            background: #0066FF;
+            color: white;
+        }
+        
+        .cs-btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
         }
     </style>
 </body>
-</html>
+                            </html>
