@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="generator" content="ConnectSphere ISP Framework">
+    <meta name="csrf-token" content="your-csrf-token">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <meta name="theme-color" content="#0066FF">
+    
+    <title>ConnectSphere: WiFi Portal</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="Connectspeherestyle.css">
+    
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="connectsphere-portal">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="cs-loading-screen">
+        <div class="cs-loading-content">
+            <div class="cs-loading-spinner"></div>
+            <h2>ConnectSphere Portal</h2>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" style="display: none;">
+        <!-- Top Navigation -->
+        <nav class="cs-navbar">
+            <div class="cs-navbar-brand">
+                <i class="fas fa-wifi"></i>
+                <span>ConnectSphere</span>
+            </div>
+            
+            <div class="cs-navbar-menu">
+                <a href="dashboard.html" class="cs-nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="services.html" class="cs-nav-item">
+                    <i class="fas fa-wifi"></i>
+                    <span>My Services</span>
+                </a>
+                <a href="billing.html" class="cs-nav-item">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Billing</span>
+                </a>
+                <a href="tickets.html" class="cs-nav-item">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Support</span>
+                </a>
+                <div class="cs-nav-item dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                    <div class="cs-dropdown-menu">
+                        <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                        <div class="cs-divider"></div>
+                        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="cs-main-content">
+            <div class="cs-container">
+                <!-- Portal Header -->
+                <div class="cs-portal-header">
+                    <h1>Welcome to ConnectSphere WiFi</h1>
+                    <p>Connect to our secure network</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="cs-stats-grid">
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="activeUsers">0</h3>
+                            <p>Active Users</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="sessionTime">0h 0m</h3>
+                            <p>Session Time</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cs-stat-card">
+                        <div class="cs-stat-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="cs-stat-content">
+                            <h3 id="dataUsage">0 MB</h3>
+                            <p>Data Used</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Connection Form -->
+                <div class="cs-connection-card">
+                    <h2><i class="fas fa-plug"></i> Connect to WiFi</h2>
+                    
+                    <form id="connectionForm" class="cs-connection-form">
+                        <div class="cs-form-row">
+                            <div class="cs-form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="userName" placeholder="Enter your name" required>
+                            </div>
+                            <div class="cs-form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="userEmail" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-form-row">
+                            <div class="cs-form-group">
+                                <label>Phone Number</label>
+                                <input type="tel" id="userPhone" placeholder="+254 700 000 000">
+                            </div>
+                            <div class="cs-form-group">
+                                <label>Access Duration</label>
+                                <select id="accessDuration">
+                                    <option value="1">1 Hour - Free Trial</option>
+                                    <option value="4" selected>4 Hours - Standard</option>
+                                    <option value="8">8 Hours - Extended</option>
+                                    <option value="24">24 Hours - Premium</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-form-check">
+                            <input type="checkbox" id="termsAgreement" required>
+                            <label for="termsAgreement">
+                                I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="cs-connect-btn">
+                            <i class="fas fa-wifi"></i>
+                            Connect Now
+                        </button>
+                        
+                        <div class="cs-divider">
+                            <span>or connect with</span>
+                        </div>
+                        
+                        <div class="cs-social-options">
+                            <button type="button" class="cs-social-btn google">
+                                <i class="fab fa-google"></i> Google
+                            </button>
+                            <button type="button" class="cs-social-btn facebook">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </button>
+                            <button type="button" class="cs-social-btn voucher" onclick="showVoucherModal()">
+                                <i class="fas fa-ticket-alt"></i> Voucher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Services Section -->
+                <div class="cs-services-section">
+                    <h2><i class="fas fa-star"></i> Available Services</h2>
+                    <div class="cs-services-grid">
+                        <div class="cs-service-card">
+                            <div class="cs-service-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3>Speed Test</h3>
+                            <p>Test your connection speed</p>
+                            <button class="cs-service-btn" onclick="runSpeedTest()">
+                                Run Test
+                            </button>
+                        </div>
+                        
+                        <div class="cs-service-card">
+                            <div class="cs-service-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h3>Usage Stats</h3>
+                            <p>View your data usage</p>
+                            <button class="cs-service-btn" onclick="viewUsageStats()">
+                                View Stats
+                            </button>
+                        </div>
+                        
+                        <div class="cs-service-card">
+                            <div class="cs-service-icon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <h3>Support</h3>
+                            <p>Get help & support</p>
+                            <button class="cs-service-btn" onclick="openSupport()">
+                                Contact Support
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="cs-activity-section">
+                    <h2><i class="fas fa-history"></i> Recent Activity</h2>
+                    <div class="cs-activity-list" id="activityList">
+                        <!-- Activities will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="cs-footer">
+            <div class="cs-footer-content">
+                <div class="cs-footer-brand">
+                    <i class="fas fa-wifi"></i>
+                    <span>ConnectSphere</span>
+                </div>
+                <p>Enterprise WiFi Management Platform</p>
+                <div class="cs-footer-links">
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Support</a>
+                </div>
+                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Voucher Modal -->
+    <div id="voucherModal" class="cs-modal">
+        <div class="cs-modal-content">
+            <div class="cs-modal-header">
+                <h3><i class="fas fa-ticket-alt"></i> Redeem Voucher</h3>
+                <button class="cs-modal-close" onclick="closeVoucherModal()">&times;</button>
+            </div>
+            <div class="cs-modal-body">
+                <input type="text" id="voucherCode" placeholder="Enter voucher code" class="cs-voucher-input">
+                <button onclick="redeemVoucher()" class="cs-voucher-btn">
+                    <i class="fas fa-gift"></i> Redeem
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://uadbyyaxlieemfaofode.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhZGJ5eWF4bGllZW1mYW9mb2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDMyODUsImV4cCI6MjA4MTM3OTI4NX0.Gh3J0GpdQ8yXU-976JNjJKuY6rkBvn3Vkllq2vz37No';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Portal State
+        const portalState = {
+            user: null,
+            session: null,
+            isConnected: false
+        };
+
+        // Initialize Portal
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializePortal();
+            loadUserStats();
+            loadRecentActivity();
+        });
+
+        async function initializePortal() {
+            // Check for existing session
+            const sessionData = localStorage.getItem('cs_session');
+            if (sessionData) {
+                portalState.session = JSON.parse(sessionData);
+                if (new Date(portalState.session.expires) > new Date()) {
+                    portalState.isConnected = true;
+                    updateUIForConnectedUser();
+                }
+            }
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+            }, 1000);
+        }
+
+        // Connection Form Handler
+        document.getElementById('connectionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                name: document.getElementById('userName').value.trim(),
+                email: document.getElementById('userEmail').value.trim(),
+                phone: document.getElementById('userPhone').value.trim(),
+                duration: parseInt(document.getElementById('accessDuration').value),
+                terms: document.getElementById('termsAgreement').checked
+            };
+            
+            if (!validateForm(userData)) return;
+            
+            await connectUser(userData);
+        });
+
+        async function connectUser(userData) {
+            try {
+                // Show connecting state
+                document.querySelector('.cs-connect-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                document.querySelector('.cs-connect-btn').disabled = true;
+                
+                // Save user to Supabase
+                const { data: user, error } = await supabase
+                    .from('wifi_users')
+                    .insert([{
+                        name: userData.name,
+                        email: userData.email,
+                        phone: userData.phone,
+                        created_at: new Date().toISOString(),
+                        last_login: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Create session
+                const sessionEnd = new Date();
+                sessionEnd.setHours(sessionEnd.getHours() + userData.duration);
+                
+                const { data: session } = await supabase
+                    .from('wifi_sessions')
+                    .insert([{
+                        user_id: user[0].id,
+                        start_time: new Date().toISOString(),
+                        end_time: sessionEnd.toISOString(),
+                        duration_hours: userData.duration,
+                        status: 'active'
+                    }])
+                    .select();
+                
+                // Save session locally
+                portalState.session = {
+                    userId: user[0].id,
+                    email: userData.email,
+                    expires: sessionEnd.toISOString(),
+                    duration: userData.duration
+                };
+                
+                localStorage.setItem('cs_session', JSON.stringify(portalState.session));
+                portalState.isConnected = true;
+                
+                // Update UI
+                updateUIForConnectedUser();
+                showSuccess('Connected successfully!');
+                
+                // Redirect to dashboard after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                showError('Connection failed. Please try again.');
+                document.querySelector('.cs-connect-btn').innerHTML = '<i class="fas fa-wifi"></i> Connect Now';
+                document.querySelector('.cs-connect-btn').disabled = false;
+            }
+        }
+
+        function validateForm(data) {
+            if (!data.name || data.name.length < 2) {
+                showError('Please enter your full name');
+                return false;
+            }
+            
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                showError('Please enter a valid email address');
+                return false;
+            }
+            
+            if (!data.terms) {
+                showError('You must agree to the terms & conditions');
+                return false;
+            }
+            
+            return true;
+        }
+
+        async function loadUserStats() {
+            try {
+                // Load active users count
+                const { count } = await supabase
+                    .from('wifi_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'active');
+                
+                document.getElementById('activeUsers').textContent = count || 0;
+                
+                // Load session time (if connected)
+                if (portalState.session) {
+                    const now = new Date();
+                    const start = new Date(portalState.session.expires);
+                    const diffMs = start - now;
+                    const diffHrs = Math.floor(diffMs / 3600000);
+                    const diffMins = Math.floor((diffMs % 3600000) / 60000);
+                    
+                    document.getElementById('sessionTime').textContent = `${diffHrs}h ${diffMins}m`;
+                }
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const { data: activities } = await supabase
+                    .from('portal_analytics')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const activityList = document.getElementById('activityList');
+                activityList.innerHTML = '';
+                
+                if (activities && activities.length > 0) {
+                    activities.forEach(activity => {
+                        const activityItem = document.createElement('div');
+                        activityItem.className = 'cs-activity-item';
+                        activityItem.innerHTML = `
+                            <i class="fas fa-circle ${activity.action === 'user_connected' ? 'success' : 'info'}"></i>
+                            <div class="cs-activity-content">
+                                <p>${formatActivity(activity.action)}</p>
+                                <small>${formatTime(activity.created_at)}</small>
+                            </div>
+                        `;
+                        activityList.appendChild(activityItem);
+                    });
+                } else {
+                    activityList.innerHTML = '<p class="cs-empty-state">No recent activity</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading activity:', error);
+            }
+        }
+
+        function formatActivity(action) {
+            const activities = {
+                'user_connected': 'User connected to WiFi',
+                'voucher_redeemed': 'Voucher redeemed',
+                'session_expired': 'Session expired',
+                'speed_test': 'Speed test completed'
+            };
+            return activities[action] || action;
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        function updateUIForConnectedUser() {
+            document.querySelector('.cs-connection-card').innerHTML = `
+                <div class="cs-connected-status">
+                    <div class="cs-connected-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Connected to WiFi</h3>
+                    <p>You have internet access for ${portalState.session.duration} hours</p>
+                    <div class="cs-connection-info">
+                        <p><i class="fas fa-user"></i> ${portalState.session.email}</p>
+                        <p><i class="fas fa-clock"></i> Expires: ${new Date(portalState.session.expires).toLocaleTimeString()}</p>
+                    </div>
+                    <button class="cs-disconnect-btn" onclick="disconnectUser()">
+                        <i class="fas fa-power-off"></i> Disconnect
+                    </button>
+                </div>
+            `;
+        }
+
+        function showVoucherModal() {
+            document.getElementById('voucherModal').style.display = 'block';
+        }
+
+        function closeVoucherModal() {
+            document.getElementById('voucherModal').style.display = 'none';
+        }
+
+        async function redeemVoucher() {
+            const code = document.getElementById('voucherCode').value.trim();
+            if (!code) {
+                showError('Please enter a voucher code');
+                return;
+            }
+            
+            try {
+                // Check voucher in Supabase
+                const { data: voucher } = await supabase
+                    .from('vouchers')
+                    .select('*')
+                    .eq('code', code.toUpperCase())
+                    .eq('status', 'active')
+                    .single();
+                
+                if (!voucher) {
+                    showError('Invalid voucher code');
+                    return;
+                }
+                
+                // Update voucher usage
+                await supabase
+                    .from('vouchers')
+                    .update({
+                        used_count: voucher.used_count + 1,
+                        last_used: new Date().toISOString()
+                    })
+                    .eq('id', voucher.id);
+                
+                showSuccess(`Voucher redeemed! ${voucher.duration_hours} hours access granted.`);
+                closeVoucherModal();
+                
+            } catch (error) {
+                showError('Voucher redemption failed');
+            }
+        }
+
+        function showSuccess(message) {
+            // Create success notification
+            const notification = document.createElement('div');
+            notification.className = 'cs-notification success';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showError(message) {
+            // Create error notification
+            const notification = document.createElement('div');
+            notification.className = 'cs-notification error';
+            notification.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Service functions
+        function runSpeedTest() {
+            showSuccess('Speed test starting...');
+            // Implement speed test logic here
+        }
+
+        function viewUsageStats() {
+            window.location.href = 'dashboard.html#stats';
+        }
+
+        function openSupport() {
+            window.location.href = 'tickets.html';
+        }
+
+        function disconnectUser() {
+            localStorage.removeItem('cs_session');
+            portalState.isConnected = false;
+            window.location.reload();
+        }
+
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('cs_session');
+            window.location.reload();
+        });
+    </script>
+</body>
+                          </html>
