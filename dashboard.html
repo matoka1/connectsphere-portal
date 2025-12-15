@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Add Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,13 +20,26 @@
         </div>
     </div>
 
+    <!-- Notification Center -->
+    <div id="notificationCenter"></div>
+
     <!-- Main App -->
     <div id="app" style="display: none;">
         <!-- Navigation -->
         <nav class="cs-navbar">
             <div class="cs-navbar-brand">
-                <i class="fas fa-wifi"></i>
-                <span>ConnectSphere</span>
+                <div class="cs-brand-logo">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="cs-brand-text">
+                    <h2>ConnectSphere</h2>
+                    <p>Enterprise WiFi</p>
+                </div>
+            </div>
+            
+            <div class="cs-navbar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search dashboard...">
             </div>
             
             <div class="cs-navbar-menu">
@@ -47,20 +60,33 @@
                     <span>Billing</span>
                 </a>
                 <a href="tickets.html" class="cs-nav-item">
-                    <i class="fas fa-ticket-alt"></i>
+                    <i class="fas fa-headset"></i>
                     <span>Support</span>
+                    <span class="cs-notification-badge">3</span>
                 </a>
-                <div class="cs-nav-item dropdown">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="navUserName">Profile</span>
+                
+                <div class="cs-user-menu">
+                    <div class="cs-user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="cs-user-info">
+                        <span id="navUserName">Loading...</span>
+                        <span class="cs-user-role">Premium User</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
                     <div class="cs-dropdown-menu">
                         <a href="profile.html"><i class="fas fa-user"></i> My Profile</a>
                         <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                        <a href="#"><i class="fas fa-bell"></i> Notifications</a>
                         <div class="cs-divider"></div>
                         <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     </div>
                 </div>
             </div>
+            
+            <button class="cs-mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
         </nav>
 
         <!-- Main Content -->
@@ -68,148 +94,316 @@
             <div class="cs-container">
                 <!-- Dashboard Header -->
                 <div class="cs-dashboard-header">
-                    <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-                    <p>Welcome back, <span id="userName">User</span>! Here's your connection overview.</p>
+                    <div class="cs-header-content">
+                        <h1><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h1>
+                        <p>Welcome back, <span id="userName">User</span>! Here's your connection performance summary.</p>
+                    </div>
+                    <div class="cs-header-actions">
+                        <button class="cs-btn cs-btn-primary" id="refreshBtn">
+                            <i class="fas fa-redo"></i> Refresh
+                        </button>
+                        <button class="cs-btn cs-btn-outline" id="exportBtn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Quick Stats -->
+                <!-- Real-time Stats -->
                 <div class="cs-stats-grid">
-                    <div class="cs-stat-card">
+                    <div class="cs-stat-card primary">
                         <div class="cs-stat-icon">
-                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-bolt"></i>
                         </div>
                         <div class="cs-stat-content">
-                            <h3 id="currentSpeed">Loading...</h3>
-                            <p>Current Speed</p>
+                            <div class="cs-stat-value">
+                                <span id="currentSpeed">--</span>
+                                <span class="cs-stat-trend up">+2.4%</span>
+                            </div>
+                            <p class="cs-stat-label">Current Speed</p>
+                            <div class="cs-stat-subtext">
+                                <i class="fas fa-arrow-up"></i> <span id="uploadSpeed">--</span> Upload
+                            </div>
                         </div>
+                        <div class="cs-stat-chart" id="speedMiniChart"></div>
                     </div>
                     
-                    <div class="cs-stat-card">
+                    <div class="cs-stat-card success">
                         <div class="cs-stat-icon">
                             <i class="fas fa-database"></i>
                         </div>
                         <div class="cs-stat-content">
-                            <h3 id="dataUsed">Loading...</h3>
-                            <p>Data Used Today</p>
+                            <div class="cs-stat-value">
+                                <span id="dataUsed">-- GB</span>
+                                <span class="cs-stat-trend up">+1.2 GB</span>
+                            </div>
+                            <p class="cs-stat-label">Data Used Today</p>
+                            <div class="cs-stat-subtext">
+                                <span id="dataRemaining">-- GB</span> remaining
+                            </div>
+                        </div>
+                        <div class="cs-progress-bar">
+                            <div class="cs-progress-fill" id="dataProgress"></div>
                         </div>
                     </div>
                     
-                    <div class="cs-stat-card">
+                    <div class="cs-stat-card warning">
                         <div class="cs-stat-icon">
                             <i class="fas fa-clock"></i>
                         </div>
                         <div class="cs-stat-content">
-                            <h3 id="uptime">Loading...</h3>
-                            <p>Network Uptime</p>
+                            <div class="cs-stat-value">
+                                <span id="uptime">99.8%</span>
+                                <span class="cs-stat-trend stable">±0.1%</span>
+                            </div>
+                            <p class="cs-stat-label">Network Uptime</p>
+                            <div class="cs-stat-subtext">
+                                Last downtime: <span id="lastDowntime">2 days ago</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="cs-stat-card">
+                    <div class="cs-stat-card info">
                         <div class="cs-stat-icon">
-                            <i class="fas fa-calendar-alt"></i>
+                            <i class="fas fa-calendar-check"></i>
                         </div>
                         <div class="cs-stat-content">
-                            <h3 id="daysLeft">Loading...</h3>
-                            <p>Billing Cycle</p>
+                            <div class="cs-stat-value">
+                                <span id="daysLeft">15</span>
+                                <span class="cs-stat-trend down">Ends soon</span>
+                            </div>
+                            <p class="cs-stat-label">Billing Cycle</p>
+                            <div class="cs-stat-subtext">
+                                Renews on: <span id="renewalDate">Jan 15, 2024</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Charts Section -->
+                <!-- Main Charts Section -->
                 <div class="cs-charts-section">
-                    <div class="cs-chart-container">
+                    <div class="cs-chart-main">
                         <div class="cs-chart-header">
-                            <h3><i class="fas fa-chart-line"></i> Data Usage (Last 7 Days)</h3>
-                            <select id="chartRange" onchange="updateChart()">
-                                <option value="7">7 Days</option>
-                                <option value="30">30 Days</option>
-                                <option value="90">90 Days</option>
+                            <h3><i class="fas fa-chart-line"></i> Network Performance</h3>
+                            <div class="cs-chart-controls">
+                                <select id="timeRange" class="cs-select">
+                                    <option value="1h">Last Hour</option>
+                                    <option value="24h">24 Hours</option>
+                                    <option value="7d" selected>7 Days</option>
+                                    <option value="30d">30 Days</option>
+                                </select>
+                                <div class="cs-chart-legend">
+                                    <span class="cs-legend-item"><i class="fas fa-circle" style="color: #0066FF;"></i> Download</span>
+                                    <span class="cs-legend-item"><i class="fas fa-circle" style="color: #00D4AA;"></i> Upload</span>
+                                    <span class="cs-legend-item"><i class="fas fa-circle" style="color: #FF6B6B;"></i> Latency</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="performanceChart" style="height: 320px;"></div>
+                    </div>
+                    
+                    <div class="cs-chart-sidebar">
+                        <div class="cs-chart-container">
+                            <div class="cs-chart-header">
+                                <h3><i class="fas fa-signal"></i> Live Connection</h3>
+                            </div>
+                            <div class="cs-connection-status">
+                                <div class="cs-status-indicator large" id="statusIndicator">
+                                    <div class="cs-status-pulse"></div>
+                                    <i class="fas fa-wifi"></i>
+                                    <span id="statusText">Connected</span>
+                                </div>
+                                <div class="cs-connection-details">
+                                    <div class="cs-detail-item">
+                                        <span class="cs-detail-label">IP Address</span>
+                                        <span class="cs-detail-value" id="ipAddress">--</span>
+                                    </div>
+                                    <div class="cs-detail-item">
+                                        <span class="cs-detail-label">Signal Strength</span>
+                                        <div class="cs-signal-meter">
+                                            <div class="cs-signal-bars">
+                                                <div class="cs-signal-bar active"></div>
+                                                <div class="cs-signal-bar active"></div>
+                                                <div class="cs-signal-bar active"></div>
+                                                <div class="cs-signal-bar"></div>
+                                            </div>
+                                            <span class="cs-signal-value">Strong</span>
+                                        </div>
+                                    </div>
+                                    <div class="cs-detail-item">
+                                        <span class="cs-detail-label">Connected For</span>
+                                        <span class="cs-detail-value" id="connectedSince">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="cs-chart-container">
+                            <div class="cs-chart-header">
+                                <h3><i class="fas fa-mobile-alt"></i> Device Usage</h3>
+                            </div>
+                            <div id="deviceChart" style="height: 200px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Usage & Speed Test -->
+                <div class="cs-dashboard-grid">
+                    <div class="cs-data-usage-card">
+                        <div class="cs-chart-header">
+                            <h3><i class="fas fa-chart-pie"></i> Data Usage Breakdown</h3>
+                            <select id="usagePeriod" class="cs-select small">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
                             </select>
                         </div>
-                        <canvas id="usageChart" height="300"></canvas>
+                        <div class="cs-usage-breakdown">
+                            <div id="usageChart" style="height: 280px;"></div>
+                            <div class="cs-usage-legend">
+                                <div class="cs-legend-item">
+                                    <span class="cs-legend-color" style="background: #0066FF;"></span>
+                                    <span class="cs-legend-text">Streaming</span>
+                                    <span class="cs-legend-value">45%</span>
+                                </div>
+                                <div class="cs-legend-item">
+                                    <span class="cs-legend-color" style="background: #00D4AA;"></span>
+                                    <span class="cs-legend-text">Downloads</span>
+                                    <span class="cs-legend-value">25%</span>
+                                </div>
+                                <div class="cs-legend-item">
+                                    <span class="cs-legend-color" style="background: #FFB800;"></span>
+                                    <span class="cs-legend-text">Web Browsing</span>
+                                    <span class="cs-legend-value">15%</span>
+                                </div>
+                                <div class="cs-legend-item">
+                                    <span class="cs-legend-color" style="background: #FF6B6B;"></span>
+                                    <span class="cs-legend-text">Gaming</span>
+                                    <span class="cs-legend-value">10%</span>
+                                </div>
+                                <div class="cs-legend-item">
+                                    <span class="cs-legend-color" style="background: #9B51E0;"></span>
+                                    <span class="cs-legend-text">Other</span>
+                                    <span class="cs-legend-value">5%</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="cs-chart-container">
+                    <div class="cs-speed-test-card">
                         <div class="cs-chart-header">
-                            <h3><i class="fas fa-chart-bar"></i> Speed Test History</h3>
+                            <h3><i class="fas fa-tachometer-alt"></i> Speed Test</h3>
+                            <button class="cs-btn cs-btn-primary" id="speedTestBtn">
+                                <i class="fas fa-play"></i> Run Test
+                            </button>
                         </div>
-                        <canvas id="speedChart" height="300"></canvas>
+                        <div class="cs-speed-test-panel">
+                            <div class="cs-speed-test-result" id="speedTestResult">
+                                <div class="cs-speed-meter">
+                                    <div class="cs-speed-gauge">
+                                        <div class="cs-gauge-circle">
+                                            <span class="cs-gauge-value" id="downloadSpeed">--</span>
+                                            <span class="cs-gauge-label">Download</span>
+                                        </div>
+                                        <div class="cs-gauge-circle">
+                                            <span class="cs-gauge-value" id="uploadSpeedGauge">--</span>
+                                            <span class="cs-gauge-label">Upload</span>
+                                        </div>
+                                    </div>
+                                    <div class="cs-speed-details">
+                                        <div class="cs-detail-row">
+                                            <span class="cs-detail-label">Ping</span>
+                                            <span class="cs-detail-value" id="pingValue">-- ms</span>
+                                        </div>
+                                        <div class="cs-detail-row">
+                                            <span class="cs-detail-label">Jitter</span>
+                                            <span class="cs-detail-value" id="jitterValue">-- ms</span>
+                                        </div>
+                                        <div class="cs-detail-row">
+                                            <span class="cs-detail-label">Server</span>
+                                            <span class="cs-detail-value">Nairobi, KE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cs-speed-history">
+                                <h4>Recent Tests</h4>
+                                <div class="cs-history-list" id="speedHistoryList">
+                                    <!-- History items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Connection Status -->
-                <div class="cs-status-card">
-                    <div class="cs-status-header">
-                        <h3><i class="fas fa-network-wired"></i> Connection Status</h3>
-                        <div class="cs-status-indicator" id="statusIndicator">
-                            <i class="fas fa-circle"></i>
-                            <span id="statusText">Checking...</span>
+                <!-- Recent Activity & Alerts -->
+                <div class="cs-activity-section">
+                    <div class="cs-recent-activity">
+                        <div class="cs-section-header">
+                            <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                            <a href="tickets.html" class="cs-view-all">View All</a>
+                        </div>
+                        <div class="cs-activity-timeline" id="activityTimeline">
+                            <!-- Activity items will be populated here -->
                         </div>
                     </div>
                     
-                    <div class="cs-status-details">
-                        <div class="cs-status-item">
-                            <span class="cs-status-label">IP Address:</span>
-                            <span class="cs-status-value" id="ipAddress">Loading...</span>
+                    <div class="cs-alerts-panel">
+                        <div class="cs-section-header">
+                            <h3><i class="fas fa-bell"></i> System Alerts</h3>
+                            <span class="cs-alert-badge">3 New</span>
                         </div>
-                        <div class="cs-status-item">
-                            <span class="cs-status-label">MAC Address:</span>
-                            <span class="cs-status-value" id="macAddress">Loading...</span>
+                        <div class="cs-alerts-list" id="alertsList">
+                            <!-- Alerts will be populated here -->
                         </div>
-                        <div class="cs-status-item">
-                            <span class="cs-status-label">Connected Since:</span>
-                            <span class="cs-status-value" id="connectedSince">Loading...</span>
-                        </div>
-                        <div class="cs-status-item">
-                            <span class="cs-status-label">Session Expires:</span>
-                            <span class="cs-status-value" id="sessionExpires">Loading...</span>
-                        </div>
-                    </div>
-                    
-                    <button class="cs-disconnect-btn" id="disconnectBtn">
-                        <i class="fas fa-power-off"></i> Disconnect
-                    </button>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="cs-recent-activity">
-                    <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                    <div class="cs-activity-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Activity</th>
-                                    <th>Details</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="activityTable">
-                                <tr><td colspan="4" style="text-align: center;">Loading activity...</td></tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="cs-quick-actions">
+                <div class="cs-quick-actions-panel">
                     <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                    <div class="cs-action-buttons">
-                        <button class="cs-action-btn" id="speedTestBtn">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Speed Test</span>
+                    <div class="cs-action-grid">
+                        <button class="cs-action-card" id="topUpBtn">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="cs-action-content">
+                                <h4>Top Up Data</h4>
+                                <p>Add more data to your plan</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
                         </button>
-                        <button class="cs-action-btn" id="topUpBtn">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>Top Up Data</span>
+                        
+                        <button class="cs-action-card" id="invoiceBtn">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div class="cs-action-content">
+                                <h4>View Invoice</h4>
+                                <p>Download recent invoices</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
                         </button>
-                        <button class="cs-action-btn" id="invoiceBtn">
-                            <i class="fas fa-file-invoice"></i>
-                            <span>View Invoice</span>
+                        
+                        <button class="cs-action-card" id="supportBtn">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="cs-action-content">
+                                <h4>Get Help</h4>
+                                <p>Contact support team</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
                         </button>
-                        <button class="cs-action-btn" id="supportBtn">
-                            <i class="fas fa-question-circle"></i>
-                            <span>Get Help</span>
+                        
+                        <button class="cs-action-card" id="devicesBtn">
+                            <div class="cs-action-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="cs-action-content">
+                                <h4>Manage Devices</h4>
+                                <p>View connected devices</p>
+                            </div>
+                            <i class="fas fa-chevron-right cs-action-arrow"></i>
                         </button>
                     </div>
                 </div>
@@ -219,21 +413,1144 @@
         <!-- Footer -->
         <footer class="cs-footer">
             <div class="cs-footer-content">
-                <div class="cs-footer-brand">
+                <div class="cs-footer-logo">
                     <i class="fas fa-wifi"></i>
                     <span>ConnectSphere</span>
                 </div>
-                <p>Enterprise WiFi Management Platform</p>
                 <div class="cs-footer-links">
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Contact Us</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Privacy</a>
+                    <a href="#">Contact</a>
                     <a href="#">Support</a>
+                    <a href="#">API</a>
                 </div>
-                <p class="cs-copyright">© 2024 ConnectSphere. All rights reserved.</p>
+                <div class="cs-footer-info">
+                    <p>© 2024 ConnectSphere. All rights reserved.</p>
+                    <p class="cs-footer-version">v2.1.4</p>
+                </div>
             </div>
         </footer>
     </div>
+
+    <!-- Add CSS for new components -->
+    <style>
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052D4;
+            --secondary: #00D4AA;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            --radius-sm: 6px;
+            --radius: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 6px 12px -2px rgba(0, 0, 0, 0.1), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 6px 12px -4px rgba(0, 0, 0, 0.08);
+            --shadow-xl: 0 20px 40px -8px rgba(0, 0, 0, 0.1), 0 12px 24px -8px rgba(0, 0, 0, 0.06);
+            
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Loading Screen */
+        .cs-loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .cs-loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .cs-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Navigation */
+        .cs-navbar {
+            background: white;
+            box-shadow: var(--shadow);
+            padding: 0 24px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .cs-navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .cs-brand-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .cs-brand-text h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark);
+        }
+        
+        .cs-brand-text p {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin: 0;
+        }
+        
+        .cs-navbar-search {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 32px;
+            position: relative;
+        }
+        
+        .cs-navbar-search i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+        
+        .cs-navbar-search input {
+            width: 100%;
+            padding: 10px 16px 10px 44px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .cs-navbar-search input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+        
+        .cs-navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cs-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            color: var(--gray-600);
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .cs-nav-item:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+        
+        .cs-nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .cs-notification-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cs-user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .cs-user-menu:hover {
+            background: var(--gray-100);
+        }
+        
+        .cs-user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        .cs-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cs-user-info span:first-child {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .cs-user-role {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        .cs-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+        
+        .cs-user-menu:hover .cs-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .cs-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--gray-700);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .cs-dropdown-menu a:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+        
+        .cs-divider {
+            height: 1px;
+            background: var(--gray-200);
+            margin: 8px 0;
+        }
+        
+        /* Main Content */
+        .cs-main-content {
+            padding: 24px;
+            background: var(--gray-100);
+            min-height: calc(100vh - 70px);
+        }
+        
+        .cs-container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+        
+        /* Dashboard Header */
+        .cs-dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .cs-header-content h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .cs-header-content p {
+            color: var(--gray-600);
+            margin: 0;
+        }
+        
+        .cs-header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .cs-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .cs-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .cs-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .cs-btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Stats Grid */
+        .cs-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .cs-stat-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .cs-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .cs-stat-card.primary {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .cs-stat-card.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .cs-stat-card.warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .cs-stat-card.info {
+            border-left: 4px solid var(--info);
+        }
+        
+        .cs-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .cs-stat-card.primary .cs-stat-icon {
+            background: rgba(0, 102, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .cs-stat-card.success .cs-stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .cs-stat-card.warning .cs-stat-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .cs-stat-card.info .cs-stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        .cs-stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .cs-stat-trend {
+            font-size: 14px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        
+        .cs-stat-trend.up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .cs-stat-trend.down {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .cs-stat-trend.stable {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--gray-500);
+        }
+        
+        .cs-stat-label {
+            color: var(--gray-600);
+            margin: 0 0 8px;
+        }
+        
+        .cs-stat-subtext {
+            font-size: 14px;
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .cs-progress-bar {
+            height: 6px;
+            background: var(--gray-200);
+            border-radius: 3px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+        
+        .cs-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #34D399);
+            border-radius: 3px;
+            width: 65%;
+        }
+        
+        /* Charts Section */
+        .cs-charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .cs-chart-main, .cs-chart-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .cs-chart-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cs-chart-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .cs-select {
+            padding: 8px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius);
+            background: white;
+            font-size: 14px;
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+        
+        .cs-select.small {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .cs-chart-legend {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .cs-legend-item {
+            font-size: 14px;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Connection Status */
+        .cs-connection-status {
+            text-align: center;
+        }
+        
+        .cs-status-indicator.large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(0, 212, 170, 0.1));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+        
+        .cs-status-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 102, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        
+        .cs-status-indicator i {
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .cs-status-indicator span {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .cs-connection-details {
+            text-align: left;
+        }
+        
+        .cs-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .cs-detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cs-detail-label {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+        
+        .cs-detail-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .cs-signal-meter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .cs-signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 24px;
+        }
+        
+        .cs-signal-bar {
+            width: 6px;
+            background: var(--gray-300);
+            border-radius: 3px;
+        }
+        
+        .cs-signal-bar:nth-child(1) { height: 8px; }
+        .cs-signal-bar:nth-child(2) { height: 12px; }
+        .cs-signal-bar:nth-child(3) { height: 16px; }
+        .cs-signal-bar:nth-child(4) { height: 20px; }
+        
+        .cs-signal-bar.active {
+            background: var(--success);
+        }
+        
+        .cs-signal-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        /* Data Usage & Speed Test */
+        .cs-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .cs-data-usage-card, .cs-speed-test-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-usage-breakdown {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .cs-usage-legend {
+            flex: 1;
+        }
+        
+        .cs-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .cs-legend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cs-legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .cs-legend-text {
+            flex: 1;
+            color: var(--gray-700);
+        }
+        
+        .cs-legend-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        /* Speed Test */
+        .cs-speed-test-panel {
+            margin-top: 20px;
+        }
+        
+        .cs-speed-meter {
+            text-align: center;
+        }
+        
+        .cs-speed-gauge {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 24px 0;
+        }
+        
+        .cs-gauge-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(0, 102, 255, 0.2));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .cs-gauge-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .cs-gauge-label {
+            font-size: 14px;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+        
+        .cs-speed-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .cs-detail-row {
+            text-align: center;
+            padding: 16px;
+            background: var(--gray-100);
+            border-radius: var(--radius);
+        }
+        
+        .cs-speed-history h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 24px 0 16px;
+        }
+        
+        .cs-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .cs-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--gray-100);
+            border-radius: var(--radius);
+            font-size: 14px;
+        }
+        
+        .cs-history-time {
+            color: var(--gray-600);
+        }
+        
+        .cs-history-speed {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Activity Section */
+        .cs-activity-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .cs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .cs-view-all {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .cs-activity-timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .cs-activity-timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-200);
+        }
+        
+        .cs-activity-item {
+            position: relative;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .cs-activity-time {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+        
+        .cs-activity-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        
+        .cs-activity-desc {
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        .cs-alerts-panel {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-alert-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .cs-alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .cs-alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-100);
+            border-radius: var(--radius);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .cs-alert-icon {
+            color: var(--danger);
+            font-size: 16px;
+            margin-top: 2px;
+        }
+        
+        .cs-alert-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0 0 4px;
+        }
+        
+        .cs-alert-content p {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin: 0;
+        }
+        
+        /* Quick Actions */
+        .cs-quick-actions-panel {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .cs-action-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--gray-100);
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .cs-action-card:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .cs-action-card:hover .cs-action-content h4,
+        .cs-action-card:hover .cs-action-content p,
+        .cs-action-card:hover .cs-action-arrow {
+            color: white;
+        }
+        
+        .cs-action-icon {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+        
+        .cs-action-content {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .cs-action-content h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0 0 4px;
+        }
+        
+        .cs-action-content p {
+            font-size: 13px;
+            color: var(--gray-600);
+            margin: 0;
+        }
+        
+        .cs-action-arrow {
+            color: var(--gray-400);
+            transition: var(--transition);
+        }
+        
+        /* Footer */
+        .cs-footer {
+            background: var(--dark);
+            color: white;
+            padding: 32px 24px;
+            margin-top: 48px;
+        }
+        
+        .cs-footer-content {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .cs-footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .cs-footer-links {
+            display: flex;
+            gap: 24px;
+            margin: 16px 0;
+        }
+        
+        .cs-footer-links a {
+            color: var(--gray-300);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .cs-footer-links a:hover {
+            color: white;
+        }
+        
+        .cs-footer-info {
+            text-align: center;
+            color: var(--gray-400);
+            font-size: 14px;
+        }
+        
+        .cs-footer-version {
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        
+        /* Notification Center */
+        #notificationCenter {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .notification {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 320px;
+            animation: slideInRight 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .notification.success {
+            border-left-color: var(--success);
+        }
+        
+        .notification.error {
+            border-left-color: var(--danger);
+        }
+        
+        .notification.warning {
+            border-left-color: var(--warning);
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .cs-charts-section,
+            .cs-dashboard-grid,
+            .cs-activity-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .cs-usage-breakdown {
+                flex-direction: column;
+                gap: 24px;
+            }
+            
+            .cs-speed-gauge {
+                flex-direction: column;
+                align-items: center;
+                gap: 24px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cs-navbar-menu {
+                display: none;
+            }
+            
+            .cs-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cs-dashboard-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .cs-header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .cs-action-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 
     <script>
         // Supabase Configuration
@@ -249,10 +1566,11 @@
         let userActivity = [];
         let speedTestHistory = [];
         let usageHistory = [];
+        let charts = {};
 
         // Initialize Dashboard
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🔵 Initializing dashboard...');
+            console.log('🚀 Initializing ConnectSphere Dashboard...');
             
             try {
                 // Check authentication
@@ -261,11 +1579,14 @@
                 // Load all dashboard data
                 await loadDashboardData();
                 
-                // Initialize charts with real data
-                await initializeCharts();
+                // Initialize charts
+                initializeAllCharts();
                 
                 // Set up event listeners
                 setupEventListeners();
+                
+                // Start real-time updates
+                startRealTimeUpdates();
                 
                 // Hide loading screen, show app
                 document.getElementById('loadingScreen').style.display = 'none';
@@ -294,48 +1615,51 @@
             console.log('✅ User authenticated:', currentUser.email);
             
             // Update user name display
-            const userName = currentUser.user_metadata?.full_name || 
-                           currentUser.user_metadata?.first_name || 
-                           currentUser.email.split('@')[0];
+            const { data: userProfile } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', currentUser.id)
+                .single();
+            
+            let userName = 'User';
+            if (userProfile) {
+                userName = `${userProfile.first_name} ${userProfile.last_name}`.trim();
+            } else if (currentUser.user_metadata?.full_name) {
+                userName = currentUser.user_metadata.full_name;
+            } else if (currentUser.user_metadata?.first_name) {
+                userName = currentUser.user_metadata.first_name;
+            } else {
+                userName = currentUser.email.split('@')[0];
+            }
             
             document.getElementById('userName').textContent = userName;
-            document.getElementById('navUserName').textContent = userName.split(' ')[0]; // First name only for nav
+            document.getElementById('navUserName').textContent = userName.split(' ')[0];
         }
 
-        // Load Dashboard Data from Supabase
+        // Load Dashboard Data
         async function loadDashboardData() {
-            console.log('🔵 Loading dashboard data...');
+            console.log('📊 Loading dashboard data...');
             
             if (!currentUser) {
                 throw new Error('User not authenticated');
             }
             
             try {
-                // Load user connections
-                const { data: connections, error: connectionsError } = await supabase
-                    .from('wifi_connections')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
+                // Load all data in parallel
+                await Promise.all([
+                    loadConnections(),
+                    loadSpeedTests(),
+                    loadUsageData(),
+                    loadUserActivity(),
+                    loadAlerts()
+                ]);
                 
-                if (connectionsError) throw connectionsError;
-                userConnections = connections || [];
-                console.log('✅ Loaded connections:', userConnections.length);
-                
-                // Load user activity (from connections and other sources)
-                await loadUserActivity();
-                
-                // Load speed test history
-                await loadSpeedTestHistory();
-                
-                // Load usage history
-                await loadUsageHistory();
-                
-                // Update all dashboard components
-                updateQuickStats();
+                // Update all UI components
+                updateRealTimeStats();
                 updateConnectionStatus();
-                updateRecentActivity();
+                updateActivityTimeline();
+                updateSpeedHistory();
+                updateAlertsList();
                 
             } catch (error) {
                 console.error('❌ Error loading dashboard data:', error);
@@ -343,419 +1667,628 @@
             }
         }
 
+        // Load Connections
+        async function loadConnections() {
+            try {
+                const { data, error } = await supabase
+                    .from('wifi_connections')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) throw error;
+                userConnections = data || [];
+                
+            } catch (error) {
+                console.error('❌ Error loading connections:', error);
+            }
+        }
+
+        // Load Speed Tests
+        async function loadSpeedTests() {
+            try {
+                const { data, error } = await supabase
+                    .from('speed_tests')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(6);
+                
+                if (error) {
+                    console.warn('⚠️ Speed tests not available:', error.message);
+                    // Generate simulated data
+                    speedTestHistory = generateSpeedTestData();
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    speedTestHistory = data;
+                } else {
+                    speedTestHistory = generateSpeedTestData();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading speed tests:', error);
+                speedTestHistory = generateSpeedTestData();
+            }
+        }
+
+        // Load Usage Data
+        async function loadUsageData() {
+            try {
+                const { data, error } = await supabase
+                    .from('data_usage')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('date', { ascending: true })
+                    .limit(30);
+                
+                if (error) {
+                    console.warn('⚠️ Usage data not available:', error.message);
+                    usageHistory = generateUsageData();
+                    return;
+                }
+                
+                usageHistory = data || generateUsageData();
+                
+            } catch (error) {
+                console.error('❌ Error loading usage data:', error);
+                usageHistory = generateUsageData();
+            }
+        }
+
         // Load User Activity
         async function loadUserActivity() {
-            // Combine connections, speed tests, payments, etc.
-            userActivity = [];
-            
-            // Add connections as activity
-            userConnections.forEach(conn => {
-                userActivity.push({
-                    time: new Date(conn.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    activity: 'WiFi Connection',
-                    details: `${conn.plan} hour plan via ${conn.payment_method}`,
-                    status: conn.status,
-                    timestamp: new Date(conn.created_at)
-                });
+            try {
+                // Combine connections, speed tests, and payments
+                const { data: connections } = await supabase
+                    .from('wifi_connections')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                const { data: speedTests } = await supabase
+                    .from('speed_tests')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                const { data: payments } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                userActivity = [];
+                
+                // Add connections
+                if (connections) {
+                    connections.forEach(conn => {
+                        userActivity.push({
+                            type: 'connection',
+                            time: new Date(conn.created_at),
+                            title: 'WiFi Connection',
+                            description: `${conn.plan || '4'} hour plan activated`,
+                            status: conn.status,
+                            icon: 'fa-wifi'
+                        });
+                    });
+                }
+                
+                // Add speed tests
+                if (speedTests) {
+                    speedTests.forEach(test => {
+                        userActivity.push({
+                            type: 'speed_test',
+                            time: new Date(test.created_at),
+                            title: 'Speed Test',
+                            description: `${test.download_speed.toFixed(1)} Mbps download speed`,
+                            status: 'completed',
+                            icon: 'fa-tachometer-alt'
+                        });
+                    });
+                }
+                
+                // Add payments
+                if (payments) {
+                    payments.forEach(payment => {
+                        userActivity.push({
+                            type: 'payment',
+                            time: new Date(payment.created_at),
+                            title: 'Payment',
+                            description: `KES ${payment.amount} payment ${payment.status}`,
+                            status: payment.status,
+                            icon: 'fa-credit-card'
+                        });
+                    });
+                }
+                
+                // Sort by time
+                userActivity.sort((a, b) => b.time - a.time);
+                userActivity = userActivity.slice(0, 10);
+                
+            } catch (error) {
+                console.error('❌ Error loading user activity:', error);
+            }
+        }
+
+        // Load Alerts
+        async function loadAlerts() {
+            try {
+                const { data, error } = await supabase
+                    .from('system_alerts')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .or('status.eq.active,status.eq.new')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) {
+                    console.warn('⚠️ Alerts not available:', error.message);
+                    return [];
+                }
+                
+                return data || [];
+                
+            } catch (error) {
+                console.error('❌ Error loading alerts:', error);
+                return [];
+            }
+        }
+
+        // Initialize Charts
+        function initializeAllCharts() {
+            // Performance Chart
+            charts.performance = new ApexCharts(document.querySelector("#performanceChart"), {
+                series: [{
+                    name: 'Download Speed',
+                    data: generatePerformanceData('download')
+                }, {
+                    name: 'Upload Speed',
+                    data: generatePerformanceData('upload')
+                }, {
+                    name: 'Latency',
+                    data: generatePerformanceData('latency')
+                }],
+                chart: {
+                    height: 320,
+                    type: 'line',
+                    zoom: { enabled: false },
+                    toolbar: { show: true }
+                },
+                colors: ['#0066FF', '#00D4AA', '#FF6B6B'],
+                stroke: {
+                    width: [3, 3, 2],
+                    curve: 'smooth'
+                },
+                markers: {
+                    size: [5, 5, 3]
+                },
+                xaxis: {
+                    type: 'datetime',
+                    categories: generateTimeLabels(24)
+                },
+                yaxis: [
+                    {
+                        title: { text: 'Speed (Mbps)' },
+                        min: 0,
+                        max: 100
+                    },
+                    {
+                        opposite: true,
+                        title: { text: 'Latency (ms)' },
+                        min: 0,
+                        max: 100
+                    }
+                ],
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: {
+                        formatter: function (value, { seriesIndex }) {
+                            return seriesIndex === 2 ? value + ' ms' : value + ' Mbps';
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left'
+                }
             });
             
-            // Sort by timestamp (newest first)
-            userActivity.sort((a, b) => b.timestamp - a.timestamp);
+            charts.performance.render();
             
-            // Keep only last 10 activities
-            userActivity = userActivity.slice(0, 10);
+            // Device Chart
+            charts.device = new ApexCharts(document.querySelector("#deviceChart"), {
+                series: [65, 25, 10],
+                chart: {
+                    type: 'donut',
+                    height: 200
+                },
+                colors: ['#0066FF', '#00D4AA', '#FF6B6B'],
+                labels: ['Mobile', 'Laptop', 'Tablet'],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '70%',
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Devices',
+                                    fontSize: '14px'
+                                }
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            });
+            
+            charts.device.render();
+            
+            // Usage Chart
+            charts.usage = new ApexCharts(document.querySelector("#usageChart"), {
+                series: [45, 25, 15, 10, 5],
+                chart: {
+                    type: 'donut',
+                    height: 280
+                },
+                colors: ['#0066FF', '#00D4AA', '#FFB800', '#FF6B6B', '#9B51E0'],
+                labels: ['Streaming', 'Downloads', 'Web Browsing', 'Gaming', 'Other'],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '65%',
+                            labels: {
+                                show: true,
+                                name: { fontSize: '14px' },
+                                value: {
+                                    fontSize: '20px',
+                                    fontWeight: 'bold',
+                                    formatter: function (val) {
+                                        return val + '%';
+                                    }
+                                },
+                                total: {
+                                    show: true,
+                                    label: 'Total Usage',
+                                    fontSize: '14px',
+                                    formatter: function (w) {
+                                        return '100%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                legend: {
+                    show: false
+                }
+            });
+            
+            charts.usage.render();
+            
+            // Speed Mini Chart
+            charts.speedMini = new ApexCharts(document.querySelector("#speedMiniChart"), {
+                series: [{
+                    name: 'Speed',
+                    data: generateMiniChartData()
+                }],
+                chart: {
+                    type: 'area',
+                    height: 60,
+                    width: 120,
+                    sparkline: { enabled: true },
+                    toolbar: { show: false }
+                },
+                colors: ['#0066FF'],
+                stroke: { curve: 'smooth', width: 2 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.3,
+                        opacityTo: 0.1,
+                        stops: [0, 100]
+                    }
+                },
+                tooltip: { enabled: false }
+            });
+            
+            charts.speedMini.render();
         }
 
-        // Load Speed Test History
-        async function loadSpeedTestHistory() {
-            // In a real app, you would have a speed_tests table
-            // For now, we'll simulate with random data
-            speedTestHistory = [
-                { time: '6 AM', download: 45 + Math.random() * 10, upload: 15 + Math.random() * 5 },
-                { time: '9 AM', download: 38 + Math.random() * 10, upload: 12 + Math.random() * 5 },
-                { time: '12 PM', download: 42 + Math.random() * 10, upload: 14 + Math.random() * 5 },
-                { time: '3 PM', download: 35 + Math.random() * 10, upload: 10 + Math.random() * 5 },
-                { time: '6 PM', download: 48 + Math.random() * 10, upload: 16 + Math.random() * 5 },
-                { time: '9 PM', download: 40 + Math.random() * 10, upload: 13 + Math.random() * 5 }
-            ];
-        }
-
-        // Load Usage History
-        async function loadUsageHistory() {
-            // In a real app, you would query usage data from your database
-            // For now, we'll simulate with realistic data
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            usageHistory = days.map(day => ({
-                day,
-                download: 2 + Math.random() * 3, // 2-5 GB
-                upload: 0.5 + Math.random() * 0.5 // 0.5-1 GB
-            }));
-        }
-
-        // Update Quick Stats
-        function updateQuickStats() {
-            console.log('🔵 Updating quick stats...');
+        // Update Real-time Stats
+        function updateRealTimeStats() {
+            // Current Speed
+            const latestSpeed = speedTestHistory[0];
+            if (latestSpeed) {
+                const downloadSpeed = Math.round(latestSpeed.download_speed);
+                const uploadSpeed = Math.round(latestSpeed.upload_speed);
+                document.getElementById('currentSpeed').textContent = downloadSpeed + ' Mbps';
+                document.getElementById('uploadSpeed').textContent = uploadSpeed + ' Mbps';
+                document.getElementById('downloadSpeed').textContent = downloadSpeed + ' Mbps';
+                document.getElementById('uploadSpeedGauge').textContent = uploadSpeed + ' Mbps';
+            }
             
-            // Current Speed (from latest connection or speed test)
-            const latestSpeed = speedTestHistory.length > 0 
-                ? Math.round(speedTestHistory[speedTestHistory.length - 1].download)
-                : 25;
-            document.getElementById('currentSpeed').textContent = `${latestSpeed} Mbps`;
+            // Data Used
+            const today = new Date().toISOString().split('T')[0];
+            const todayUsage = usageHistory.find(u => u.date === today);
+            if (todayUsage) {
+                const usedGB = todayUsage.download_gb + todayUsage.upload_gb;
+                document.getElementById('dataUsed').textContent = usedGB.toFixed(1) + ' GB';
+                document.getElementById('dataRemaining').textContent = (50 - usedGB).toFixed(1) + ' GB';
+                document.getElementById('dataProgress').style.width = ((usedGB / 50) * 100) + '%';
+            }
             
-            // Data Used Today (simulated)
-            const todayUsage = usageHistory[0]?.download || 4.2;
-            document.getElementById('dataUsed').textContent = `${todayUsage.toFixed(1)} GB`;
+            // Update other stats based on user connections
+            const activeConnections = userConnections.filter(c => c.status === 'active').length;
+            document.getElementById('daysLeft').textContent = Math.floor(Math.random() * 30) + 1;
             
-            // Network Uptime (from connections)
-            const totalConnections = userConnections.length;
-            const successfulConnections = userConnections.filter(c => c.status === 'active' || c.status === 'completed').length;
-            const uptimePercentage = totalConnections > 0 ? (successfulConnections / totalConnections) * 100 : 98.5;
-            document.getElementById('uptime').textContent = `${uptimePercentage.toFixed(1)}%`;
-            
-            // Billing Cycle (simulated - would come from subscriptions table)
-            const daysLeft = 15; // This would come from user's subscription data
-            document.getElementById('daysLeft').textContent = `${daysLeft} Days`;
+            // Ping & Jitter (simulated)
+            document.getElementById('pingValue').textContent = Math.floor(Math.random() * 30) + 20 + ' ms';
+            document.getElementById('jitterValue').textContent = Math.floor(Math.random() * 10) + 2 + ' ms';
         }
 
         // Update Connection Status
         function updateConnectionStatus() {
-            console.log('🔵 Updating connection status...');
-            
             const latestConnection = userConnections[0];
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
             
-            if (latestConnection) {
-                // Update status indicator
-                const statusIndicator = document.getElementById('statusIndicator');
-                const statusText = document.getElementById('statusText');
-                
-                if (latestConnection.status === 'active') {
-                    statusIndicator.className = 'cs-status-indicator connected';
-                    statusText.textContent = 'Connected';
-                } else {
-                    statusIndicator.className = 'cs-status-indicator';
-                    statusIndicator.style.background = 'rgba(245, 158, 11, 0.1)';
-                    statusIndicator.style.color = 'var(--warning)';
-                    statusIndicator.querySelector('i').style.color = 'var(--warning)';
-                    statusText.textContent = 'Disconnected';
-                }
+            if (latestConnection && latestConnection.status === 'active') {
+                statusIndicator.className = 'cs-status-indicator large connected';
+                statusText.textContent = 'Connected';
+                statusIndicator.querySelector('i').style.color = '#10B981';
                 
                 // Update connection details
                 document.getElementById('ipAddress').textContent = latestConnection.ip_address || '192.168.1.100';
-                document.getElementById('macAddress').textContent = latestConnection.mac_address || '00:1A:2B:3C:4D:5E';
                 
-                // Calculate time since connection
+                // Calculate connection duration
                 const connectedTime = new Date(latestConnection.created_at);
                 const now = new Date();
-                const hoursDiff = Math.floor((now - connectedTime) / (1000 * 60 * 60));
-                const minutesDiff = Math.floor((now - connectedTime) / (1000 * 60)) % 60;
-                
+                const hours = Math.floor((now - connectedTime) / (1000 * 60 * 60));
+                const minutes = Math.floor((now - connectedTime) / (1000 * 60)) % 60;
                 document.getElementById('connectedSince').textContent = 
-                    hoursDiff > 0 ? `${hoursDiff}h ${minutesDiff}m ago` : `${minutesDiff}m ago`;
+                    hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+            } else {
+                statusIndicator.className = 'cs-status-indicator large';
+                statusText.textContent = 'Disconnected';
+                statusIndicator.querySelector('i').style.color = '#EF4444';
                 
-                // Calculate session expiry
-                const planHours = parseInt(latestConnection.plan) || 4;
-                const expiryTime = new Date(connectedTime.getTime() + (planHours * 60 * 60 * 1000));
-                const timeLeft = expiryTime - now;
-                
-                if (timeLeft > 0) {
-                    const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-                    const minutesLeft = Math.floor((timeLeft / (1000 * 60)) % 60);
-                    document.getElementById('sessionExpires').textContent = 
-                        `in ${hoursLeft}h ${minutesLeft}m`;
-                } else {
-                    document.getElementById('sessionExpires').textContent = 'Expired';
-                }
+                document.getElementById('ipAddress').textContent = '--';
+                document.getElementById('connectedSince').textContent = '--';
             }
         }
 
-        // Update Recent Activity
-        function updateRecentActivity() {
-            console.log('🔵 Updating recent activity...');
-            
-            const table = document.getElementById('activityTable');
-            table.innerHTML = '';
+        // Update Activity Timeline
+        function updateActivityTimeline() {
+            const timeline = document.getElementById('activityTimeline');
+            timeline.innerHTML = '';
             
             if (userActivity.length === 0) {
-                table.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--gray-500);">No recent activity</td></tr>';
+                timeline.innerHTML = '<div class="cs-activity-item"><p style="color: var(--gray-500); text-align: center;">No recent activity</p></div>';
                 return;
             }
             
             userActivity.forEach(activity => {
-                const row = document.createElement('tr');
+                const item = document.createElement('div');
+                item.className = 'cs-activity-item';
                 
-                // Determine status class
-                let statusClass = 'completed';
-                if (activity.status === 'pending') statusClass = 'pending';
-                if (activity.status === 'failed') statusClass = 'error';
+                const timeStr = formatTimeAgo(activity.time);
+                const icon = activity.icon || 'fa-circle';
                 
-                row.innerHTML = `
-                    <td>${activity.time}</td>
-                    <td>${activity.activity}</td>
-                    <td>${activity.details}</td>
-                    <td><span class="cs-status-badge ${statusClass}">${activity.status}</span></td>
+                item.innerHTML = `
+                    <div class="cs-activity-time">${timeStr}</div>
+                    <div class="cs-activity-title">
+                        <i class="fas ${icon}"></i> ${activity.title}
+                    </div>
+                    <div class="cs-activity-desc">${activity.description}</div>
                 `;
-                table.appendChild(row);
+                
+                timeline.appendChild(item);
             });
         }
 
-        // Initialize Charts with Real Data
-        async function initializeCharts() {
-            console.log('🔵 Initializing charts...');
+        // Update Speed History
+        function updateSpeedHistory() {
+            const historyList = document.getElementById('speedHistoryList');
+            historyList.innerHTML = '';
             
-            // Usage Chart
-            const usageCtx = document.getElementById('usageChart').getContext('2d');
-            window.usageChart = new Chart(usageCtx, {
-                type: 'line',
-                data: {
-                    labels: usageHistory.map(d => d.day),
-                    datasets: [{
-                        label: 'Download (GB)',
-                        data: usageHistory.map(d => d.download),
-                        borderColor: '#0066FF',
-                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: 'Upload (GB)',
-                        data: usageHistory.map(d => d.upload),
-                        borderColor: '#00D4AA',
-                        backgroundColor: 'rgba(0, 212, 170, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} GB`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Data Usage (GB)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + ' GB';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Speed Chart
-            const speedCtx = document.getElementById('speedChart').getContext('2d');
-            window.speedChart = new Chart(speedCtx, {
-                type: 'bar',
-                data: {
-                    labels: speedTestHistory.map(d => d.time),
-                    datasets: [{
-                        label: 'Download Speed (Mbps)',
-                        data: speedTestHistory.map(d => d.download),
-                        backgroundColor: 'rgba(0, 102, 255, 0.7)',
-                        borderColor: '#0066FF',
-                        borderWidth: 1
-                    }, {
-                        label: 'Upload Speed (Mbps)',
-                        data: speedTestHistory.map(d => d.upload),
-                        backgroundColor: 'rgba(0, 212, 170, 0.7)',
-                        borderColor: '#00D4AA',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} Mbps`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Speed (Mbps)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + ' Mbps';
-                                }
-                            }
-                        }
-                    }
-                }
+            speedTestHistory.slice(0, 5).forEach(test => {
+                const item = document.createElement('div');
+                item.className = 'cs-history-item';
+                
+                const time = new Date(test.created_at);
+                const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                item.innerHTML = `
+                    <div class="cs-history-time">Today, ${timeStr}</div>
+                    <div class="cs-history-speed">${Math.round(test.download_speed)} Mbps</div>
+                `;
+                
+                historyList.appendChild(item);
             });
         }
 
-        // Update Chart based on range selection
-        function updateChart() {
-            const range = parseInt(document.getElementById('chartRange').value);
-            console.log(`Updating chart for ${range} days`);
+        // Update Alerts List
+        async function updateAlertsList() {
+            const alertsList = document.getElementById('alertsList');
+            const alerts = await loadAlerts();
             
-            // In a real app, you would fetch data for the selected range
-            // For now, we'll just update the chart title
-            document.querySelector('#usageChart').previousElementSibling
-                .querySelector('h3').innerHTML = `<i class="fas fa-chart-line"></i> Data Usage (Last ${range} Days)`;
+            alertsList.innerHTML = '';
+            
+            if (alerts.length === 0) {
+                alertsList.innerHTML = '<div class="cs-alert-item"><p style="color: var(--gray-500);">No active alerts</p></div>';
+                return;
+            }
+            
+            alerts.forEach(alert => {
+                const item = document.createElement('div');
+                item.className = 'cs-alert-item';
+                
+                let icon = 'fa-info-circle';
+                if (alert.severity === 'high') icon = 'fa-exclamation-triangle';
+                if (alert.severity === 'medium') icon = 'fa-exclamation-circle';
+                
+                item.innerHTML = `
+                    <i class="fas ${icon} cs-alert-icon"></i>
+                    <div class="cs-alert-content">
+                        <h4>${alert.title}</h4>
+                        <p>${alert.message}</p>
+                    </div>
+                `;
+                
+                alertsList.appendChild(item);
+            });
         }
 
         // Setup Event Listeners
         function setupEventListeners() {
-            // Disconnect Button
-            document.getElementById('disconnectBtn').addEventListener('click', disconnect);
+            // Refresh Button
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                location.reload();
+            });
+            
+            // Speed Test Button
+            document.getElementById('speedTestBtn').addEventListener('click', runSpeedTest);
             
             // Quick Action Buttons
-            document.getElementById('speedTestBtn').addEventListener('click', runSpeedTest);
-            document.getElementById('topUpBtn').addEventListener('click', topUpData);
-            document.getElementById('invoiceBtn').addEventListener('click', viewInvoice);
-            document.getElementById('supportBtn').addEventListener('click', openSupport);
+            document.getElementById('topUpBtn').addEventListener('click', () => {
+                window.location.href = 'billing.html#topup';
+            });
+            
+            document.getElementById('invoiceBtn').addEventListener('click', () => {
+                window.location.href = 'billing.html#invoices';
+            });
+            
+            document.getElementById('supportBtn').addEventListener('click', () => {
+                window.location.href = 'tickets.html';
+            });
+            
+            document.getElementById('devicesBtn').addEventListener('click', () => {
+                window.location.href = 'services.html#devices';
+            });
             
             // Logout Button
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Time Range Selector
+            document.getElementById('timeRange').addEventListener('change', (e) => {
+                updatePerformanceChart(e.target.value);
+            });
+            
+            // Usage Period Selector
+            document.getElementById('usagePeriod').addEventListener('change', (e) => {
+                updateUsageChart(e.target.value);
+            });
         }
 
         // Run Speed Test
         async function runSpeedTest() {
+            const btn = document.getElementById('speedTestBtn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            btn.disabled = true;
+            
             try {
-                // Show loading
-                const btn = document.getElementById('speedTestBtn');
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
-                btn.disabled = true;
+                // Show testing notification
+                showNotification('Running speed test... This may take a few seconds.', 'info');
                 
-                // Simulate speed test (in real app, this would call your speed test API)
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                // Simulate speed test (in real app, call your API)
+                await new Promise(resolve => setTimeout(resolve, 3000));
                 
-                // Generate random speed results
-                const downloadSpeed = 30 + Math.random() * 40; // 30-70 Mbps
-                const uploadSpeed = downloadSpeed * 0.3 + Math.random() * 10; // 30% of download + random
+                // Generate realistic results
+                const downloadSpeed = 40 + Math.random() * 30; // 40-70 Mbps
+                const uploadSpeed = downloadSpeed * 0.3 + Math.random() * 10; // ~30% of download
+                const ping = 20 + Math.random() * 20; // 20-40 ms
+                const jitter = 2 + Math.random() * 5; // 2-7 ms
                 
-                // Save speed test to database (in real app)
-                // const { error } = await supabase
-                //     .from('speed_tests')
-                //     .insert([{
-                //         user_id: currentUser.id,
-                //         download_speed: downloadSpeed,
-                //         upload_speed: uploadSpeed,
-                //         created_at: new Date().toISOString()
-                //     }]);
+                // Save to database
+                const { error } = await supabase
+                    .from('speed_tests')
+                    .insert([{
+                        user_id: currentUser.id,
+                        download_speed: downloadSpeed,
+                        upload_speed: uploadSpeed,
+                        ping: ping,
+                        jitter: jitter,
+                        created_at: new Date().toISOString()
+                    }]);
+                
+                if (error) throw error;
                 
                 // Update UI
-                document.getElementById('currentSpeed').textContent = `${Math.round(downloadSpeed)} Mbps`;
+                document.getElementById('currentSpeed').textContent = Math.round(downloadSpeed) + ' Mbps';
+                document.getElementById('uploadSpeed').textContent = Math.round(uploadSpeed) + ' Mbps';
+                document.getElementById('downloadSpeed').textContent = Math.round(downloadSpeed) + ' Mbps';
+                document.getElementById('uploadSpeedGauge').textContent = Math.round(uploadSpeed) + ' Mbps';
+                document.getElementById('pingValue').textContent = Math.round(ping) + ' ms';
+                document.getElementById('jitterValue').textContent = Math.round(jitter) + ' ms';
                 
                 // Add to activity
                 userActivity.unshift({
-                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    activity: 'Speed Test',
-                    details: `${Math.round(downloadSpeed)} Mbps download, ${Math.round(uploadSpeed)} Mbps upload`,
-                    status: 'Completed',
-                    timestamp: new Date()
+                    type: 'speed_test',
+                    time: new Date(),
+                    title: 'Speed Test',
+                    description: `${Math.round(downloadSpeed)} Mbps download speed`,
+                    status: 'completed',
+                    icon: 'fa-tachometer-alt'
+                });
+                
+                // Update history
+                speedTestHistory.unshift({
+                    download_speed: downloadSpeed,
+                    upload_speed: uploadSpeed,
+                    created_at: new Date().toISOString()
                 });
                 
                 // Update charts
-                speedTestHistory.push({
-                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    download: downloadSpeed,
-                    upload: uploadSpeed
-                });
+                updatePerformanceChart(document.getElementById('timeRange').value);
+                updateActivityTimeline();
+                updateSpeedHistory();
                 
-                // Keep only last 6 entries
-                if (speedTestHistory.length > 6) {
-                    speedTestHistory = speedTestHistory.slice(-6);
-                }
-                
-                // Refresh charts and activity
-                window.speedChart.data.datasets[0].data = speedTestHistory.map(d => d.download);
-                window.speedChart.data.datasets[1].data = speedTestHistory.map(d => d.upload);
-                window.speedChart.update();
-                updateRecentActivity();
-                
-                // Show notification
+                // Show success notification
                 showNotification(`Speed test completed: ${Math.round(downloadSpeed)} Mbps download`, 'success');
                 
             } catch (error) {
                 console.error('Speed test failed:', error);
                 showNotification('Speed test failed. Please try again.', 'error');
             } finally {
-                // Reset button
-                const btn = document.getElementById('speedTestBtn');
-                btn.innerHTML = '<i class="fas fa-tachometer-alt"></i><span>Speed Test</span>';
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         }
 
-        // Top Up Data
-        function topUpData() {
-            window.location.href = 'billing.html#topup';
+        // Update Performance Chart
+        function updatePerformanceChart(range) {
+            // This would normally fetch new data based on range
+            // For now, we'll update with new simulated data
+            charts.performance.updateSeries([{
+                name: 'Download Speed',
+                data: generatePerformanceData('download', range)
+            }, {
+                name: 'Upload Speed',
+                data: generatePerformanceData('upload', range)
+            }, {
+                name: 'Latency',
+                data: generatePerformanceData('latency', range)
+            }]);
         }
 
-        // View Invoice
-        function viewInvoice() {
-            window.location.href = 'billing.html#invoices';
-        }
-
-        // Open Support
-        function openSupport() {
-            window.location.href = 'tickets.html';
-        }
-
-        // Disconnect Function
-        async function disconnect() {
-            if (!confirm('Are you sure you want to disconnect your current session?')) {
-                return;
-            }
-            
-            try {
-                // Find active connection
-                const activeConnection = userConnections.find(c => c.status === 'active');
-                
-                if (activeConnection) {
-                    // Update connection status in database
-                    const { error } = await supabase
-                        .from('wifi_connections')
-                        .update({ 
-                            status: 'disconnected',
-                            connection_end: new Date().toISOString()
-                        })
-                        .eq('id', activeConnection.id);
-                    
-                    if (error) throw error;
-                    
-                    // Update local data
-                    activeConnection.status = 'disconnected';
-                    
-                    // Update UI
-                    updateConnectionStatus();
-                    updateRecentActivity();
-                    
-                    showNotification('Disconnected successfully', 'success');
-                } else {
-                    showNotification('No active connection found', 'info');
-                }
-                
-            } catch (error) {
-                console.error('Disconnect failed:', error);
-                showNotification('Failed to disconnect. Please try again.', 'error');
-            }
+        // Update Usage Chart
+        function updateUsageChart(period) {
+            // This would normally fetch new usage data based on period
+            // For now, we'll just update the chart title
+            console.log('Updating usage chart for:', period);
         }
 
         // Handle Logout
@@ -763,34 +2296,144 @@
             e.preventDefault();
             
             try {
-                // Sign out from Supabase
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                
-                // Clear local storage
+                await supabase.auth.signOut();
                 localStorage.removeItem('cs_session');
-                
-                // Redirect to home page
                 window.location.href = 'index.html';
-                
             } catch (error) {
                 console.error('Logout failed:', error);
-                alert('Logout failed. Please try again.');
+                showNotification('Logout failed. Please try again.', 'error');
             }
         }
 
+        // Start Real-time Updates
+        function startRealTimeUpdates() {
+            // Update time every minute
+            setInterval(() => {
+                updateRealTimeStats();
+            }, 60000);
+            
+            // Check for new alerts every 5 minutes
+            setInterval(async () => {
+                await updateAlertsList();
+            }, 300000);
+        }
+
         // Helper Functions
+        function generateSpeedTestData() {
+            const tests = [];
+            const now = new Date();
+            
+            for (let i = 0; i < 6; i++) {
+                const time = new Date(now.getTime() - (i * 4 * 60 * 60 * 1000));
+                tests.push({
+                    download_speed: 30 + Math.random() * 40,
+                    upload_speed: 10 + Math.random() * 20,
+                    ping: 20 + Math.random() * 20,
+                    jitter: 2 + Math.random() * 5,
+                    created_at: time.toISOString()
+                });
+            }
+            
+            return tests;
+        }
+
+        function generateUsageData() {
+            const usage = [];
+            const now = new Date();
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+                usage.push({
+                    date: date.toISOString().split('T')[0],
+                    download_gb: 2 + Math.random() * 3,
+                    upload_gb: 0.5 + Math.random() * 0.5
+                });
+            }
+            
+            return usage;
+        }
+
+        function generatePerformanceData(type, range = '24h') {
+            const data = [];
+            const now = new Date();
+            let points = 24;
+            
+            if (range === '7d') points = 7;
+            if (range === '30d') points = 30;
+            
+            for (let i = points - 1; i >= 0; i--) {
+                const time = new Date(now.getTime() - (i * (24 * 60 * 60 * 1000) / points));
+                
+                let value;
+                if (type === 'download') {
+                    value = 40 + Math.random() * 30;
+                } else if (type === 'upload') {
+                    value = 15 + Math.random() * 15;
+                } else {
+                    value = 20 + Math.random() * 20;
+                }
+                
+                data.push({
+                    x: time.getTime(),
+                    y: Math.round(value * 10) / 10
+                });
+            }
+            
+            return data;
+        }
+
+        function generateTimeLabels(points) {
+            const labels = [];
+            const now = new Date();
+            
+            for (let i = points - 1; i >= 0; i--) {
+                const time = new Date(now.getTime() - (i * (24 * 60 * 60 * 1000) / points));
+                labels.push(time.getTime());
+            }
+            
+            return labels;
+        }
+
+        function generateMiniChartData() {
+            const data = [];
+            for (let i = 0; i < 10; i++) {
+                data.push(40 + Math.random() * 20);
+            }
+            return data;
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+
         function showNotification(message, type = 'info') {
-            // Create notification element
+            const notificationCenter = document.getElementById('notificationCenter');
+            
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.innerHTML = `
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()">&times;</button>
+                <div style="flex: 1;">
+                    <p style="margin: 0; font-weight: 600;">${type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'}</p>
+                    <p style="margin: 4px 0 0; font-size: 14px;">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: var(--gray-500); cursor: pointer; padding: 4px;">
+                    <i class="fas fa-times"></i>
+                </button>
             `;
             
-            document.body.appendChild(notification);
+            notificationCenter.appendChild(notification);
             
             // Auto-remove after 5 seconds
             setTimeout(() => {
@@ -809,441 +2452,12 @@
                     </div>
                     <h2>Dashboard Error</h2>
                     <p>${message}</p>
-                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="window.location.reload()" style="margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 20px auto 0;">
                         <i class="fas fa-redo"></i> Refresh Page
                     </button>
                 </div>
             `;
         }
-        // Add this function to fetch real activity data
-async function loadRealActivity() {
-    try {
-        console.log('🔵 Loading real activity data...');
-        
-        if (!currentUser) {
-            console.warn('⚠️ No user found for activity');
-            return;
-        }
-        
-        // Load user connections (should already have this)
-        const { data: connections, error: connError } = await supabase
-            .from('wifi_connections')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(10);
-        
-        if (connError) throw connError;
-        
-        // Load speed tests
-        const { data: speedTests, error: speedError } = await supabase
-            .from('speed_tests')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
-        
-        if (speedError) console.warn('⚠️ Speed tests not loaded:', speedError.message);
-        
-        // Combine all activities
-        userActivity = [];
-        
-        // Add connections
-        if (connections && connections.length > 0) {
-            connections.forEach(conn => {
-                userActivity.push({
-                    time: new Date(conn.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    date: new Date(conn.created_at),
-                    activity: 'WiFi Connection',
-                    details: `${conn.plan || '4'} hour plan via ${conn.payment_method || 'M-Pesa'}`,
-                    status: conn.status || 'completed',
-                    timestamp: new Date(conn.created_at)
-                });
-            });
-        }
-        
-        // Add speed tests
-        if (speedTests && speedTests.length > 0) {
-            speedTests.forEach(test => {
-                userActivity.push({
-                    time: new Date(test.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    date: new Date(test.created_at),
-                    activity: 'Speed Test',
-                    details: `${test.download_speed.toFixed(1)} Mbps download, ${test.upload_speed.toFixed(1)} Mbps upload`,
-                    status: 'completed',
-                    timestamp: new Date(test.created_at)
-                });
-            });
-        }
-        
-        // Sort by timestamp (newest first)
-        userActivity.sort((a, b) => b.timestamp - a.timestamp);
-        
-        // Keep only last 10 activities
-        userActivity = userActivity.slice(0, 10);
-        
-        console.log('✅ Loaded', userActivity.length, 'activities');
-        
-    } catch (error) {
-        console.error('❌ Error loading activity:', error);
-    }
-}
-
-// Update the loadUserActivity function
-async function loadUserActivity() {
-    await loadRealActivity();
-}
-
-// Update the loadDashboardData function to load real data
-async function loadDashboardData() {
-    console.log('🔵 Loading comprehensive dashboard data...');
-    
-    if (!currentUser) {
-        throw new Error('User not authenticated');
-    }
-    
-    try {
-        // Load user profile for name
-        const { data: userProfile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-        
-        if (!profileError && userProfile) {
-            // Display full name if available
-            const fullName = userProfile.first_name && userProfile.last_name 
-                ? `${userProfile.first_name} ${userProfile.last_name}`
-                : currentUser.user_metadata?.full_name 
-                || currentUser.email?.split('@')[0] 
-                || 'User';
-            
-            document.getElementById('userName').textContent = fullName;
-        }
-        
-        // Load all data in parallel
-        await Promise.all([
-            loadRealConnections(),
-            loadRealActivity(),
-            loadRealSpeedTests(),
-            loadRealUsageData()
-        ]);
-        
-        // Update all UI components
-        updateQuickStats();
-        updateConnectionStatus();
-        updateRecentActivity();
-        
-    } catch (error) {
-        console.error('❌ Error loading dashboard data:', error);
-        throw error;
-    }
-}
-
-// Add these new data loading functions
-async function loadRealConnections() {
-    try {
-        const { data, error } = await supabase
-            .from('wifi_connections')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
-        
-        if (error) throw error;
-        
-        userConnections = data || [];
-        console.log('✅ Loaded', userConnections.length, 'connections');
-        
-    } catch (error) {
-        console.error('❌ Error loading connections:', error);
-        userConnections = [];
-    }
-}
-
-async function loadRealSpeedTests() {
-    try {
-        const { data, error } = await supabase
-            .from('speed_tests')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(6);
-        
-        if (error) {
-            console.warn('⚠️ Speed tests table might not exist:', error.message);
-            // Fallback to simulated data
-            speedTestHistory = generateSpeedTestData();
-            return;
-        }
-        
-        if (data && data.length > 0) {
-            // Convert to chart format
-            const times = ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM'];
-            speedTestHistory = data.slice(0, 6).map((test, index) => ({
-                time: times[index] || new Date(test.created_at).toLocaleTimeString([], {hour: '2-digit'}),
-                download: test.download_speed,
-                upload: test.upload_speed
-            }));
-        } else {
-            // Generate simulated data if no real data
-            speedTestHistory = generateSpeedTestData();
-        }
-        
-        console.log('✅ Loaded speed test data');
-        
-    } catch (error) {
-        console.error('❌ Error loading speed tests:', error);
-        speedTestHistory = generateSpeedTestData();
-    }
-}
-
-async function loadRealUsageData() {
-    try {
-        const { data, error } = await supabase
-            .from('data_usage')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('date', { ascending: true })
-            .limit(7);
-        
-        if (error) {
-            console.warn('⚠️ Data usage table might not exist:', error.message);
-            // Fallback to simulated data
-            usageHistory = generateUsageData();
-            return;
-        }
-        
-        if (data && data.length > 0) {
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            usageHistory = data.map(usage => ({
-                day: days[new Date(usage.date).getDay()],
-                download: usage.download_gb,
-                upload: usage.upload_gb
-            }));
-        } else {
-            // Generate simulated data if no real data
-            usageHistory = generateUsageData();
-        }
-        
-        console.log('✅ Loaded usage data');
-        
-    } catch (error) {
-        console.error('❌ Error loading usage data:', error);
-        usageHistory = generateUsageData();
-    }
-}
-
-// Helper functions for simulated data
-function generateSpeedTestData() {
-    return [
-        { time: '6 AM', download: 45 + Math.random() * 10, upload: 15 + Math.random() * 5 },
-        { time: '9 AM', download: 38 + Math.random() * 10, upload: 12 + Math.random() * 5 },
-        { time: '12 PM', download: 42 + Math.random() * 10, upload: 14 + Math.random() * 5 },
-        { time: '3 PM', download: 35 + Math.random() * 10, upload: 10 + Math.random() * 5 },
-        { time: '6 PM', download: 48 + Math.random() * 10, upload: 16 + Math.random() * 5 },
-        { time: '9 PM', download: 40 + Math.random() * 10, upload: 13 + Math.random() * 5 }
-    ];
-}
-
-function generateUsageData() {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map(day => ({
-        day,
-        download: 2 + Math.random() * 3, // 2-5 GB
-        upload: 0.5 + Math.random() * 0.5 // 0.5-1 GB
-    }));
-}
-
-// Update the updateConnectionStatus function
-function updateConnectionStatus() {
-    console.log('🔵 Updating connection status...');
-    
-    const latestConnection = userConnections[0];
-    
-    if (latestConnection) {
-        // Update status indicator
-        const statusIndicator = document.getElementById('statusIndicator');
-        const statusText = document.getElementById('statusText');
-        
-        if (latestConnection.status === 'active') {
-            statusIndicator.className = 'cs-status-indicator connected';
-            statusText.textContent = 'Connected';
-        } else {
-            statusIndicator.className = 'cs-status-indicator';
-            statusIndicator.style.background = 'rgba(245, 158, 11, 0.1)';
-            statusIndicator.style.color = 'var(--warning)';
-            statusIndicator.querySelector('i').style.color = 'var(--warning)';
-            statusText.textContent = 'Disconnected';
-        }
-        
-        // Update connection details with real data
-        document.getElementById('ipAddress').textContent = latestConnection.ip_address || '192.168.1.100';
-        document.getElementById('macAddress').textContent = latestConnection.mac_address || '00:1A:2B:3C:4D:5E';
-        
-        // Calculate time since connection
-        const connectedTime = new Date(latestConnection.created_at);
-        const now = new Date();
-        const hoursDiff = Math.floor((now - connectedTime) / (1000 * 60 * 60));
-        const minutesDiff = Math.floor((now - connectedTime) / (1000 * 60)) % 60;
-        
-        document.getElementById('connectedSince').textContent = 
-            hoursDiff > 0 ? `${hoursDiff}h ${minutesDiff}m ago` : `${minutesDiff}m ago`;
-        
-        // Calculate session expiry
-        const planHours = parseInt(latestConnection.plan) || 4;
-        const expiryTime = new Date(connectedTime.getTime() + (planHours * 60 * 60 * 1000));
-        const timeLeft = expiryTime - now;
-        
-        if (timeLeft > 0) {
-            const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
-            const minutesLeft = Math.floor((timeLeft / (1000 * 60)) % 60);
-            document.getElementById('sessionExpires').textContent = 
-                `in ${hoursLeft}h ${minutesLeft}m`;
-        } else {
-            document.getElementById('sessionExpires').textContent = 'Expired';
-        }
-        
-    } else {
-        // No connections found
-        document.getElementById('statusText').textContent = 'No Connection';
-        document.getElementById('ipAddress').textContent = 'Not connected';
-        document.getElementById('macAddress').textContent = 'Not connected';
-        document.getElementById('connectedSince').textContent = 'N/A';
-        document.getElementById('sessionExpires').textContent = 'N/A';
-    }
-}
-
-// Update the runSpeedTest function to save to database
-async function runSpeedTest() {
-    try {
-        const btn = document.getElementById('speedTestBtn');
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
-        btn.disabled = true;
-        
-        // Show notification
-        showNotification('Running speed test...', 'info');
-        
-        // Simulate speed test (in real app, this would call your speed test API)
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // Generate realistic speed results
-        const downloadSpeed = 30 + Math.random() * 40; // 30-70 Mbps
-        const uploadSpeed = downloadSpeed * 0.3 + Math.random() * 10; // 30% of download + random
-        
-        // Save speed test to database
-        const { error: saveError } = await supabase
-            .from('speed_tests')
-            .insert([{
-                user_id: currentUser.id,
-                download_speed: downloadSpeed,
-                upload_speed: uploadSpeed,
-                created_at: new Date().toISOString()
-            }]);
-        
-        if (saveError) {
-            console.warn('⚠️ Could not save speed test:', saveError.message);
-            // Continue anyway - user will see the result
-        }
-        
-        // Update current speed display
-        document.getElementById('currentSpeed').textContent = `${Math.round(downloadSpeed)} Mbps`;
-        
-        // Add to activity
-        userActivity.unshift({
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            activity: 'Speed Test',
-            details: `${Math.round(downloadSpeed)} Mbps download, ${Math.round(uploadSpeed)} Mbps upload`,
-            status: 'Completed',
-            timestamp: new Date()
-        });
-        
-        // Update speed test history for chart
-        speedTestHistory.push({
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            download: downloadSpeed,
-            upload: uploadSpeed
-        });
-        
-        // Keep only last 6 entries
-        if (speedTestHistory.length > 6) {
-            speedTestHistory = speedTestHistory.slice(-6);
-        }
-        
-        // Refresh charts and activity
-        if (window.speedChart) {
-            window.speedChart.data.datasets[0].data = speedTestHistory.map(d => d.download);
-            window.speedChart.data.datasets[1].data = speedTestHistory.map(d => d.upload);
-            window.speedChart.update();
-        }
-        
-        updateRecentActivity();
-        
-        // Show success notification
-        showNotification(`Speed test completed: ${Math.round(downloadSpeed)} Mbps download`, 'success');
-        
-    } catch (error) {
-        console.error('Speed test failed:', error);
-        showNotification('Speed test failed. Please try again.', 'error');
-    } finally {
-        const btn = document.getElementById('speedTestBtn');
-        btn.innerHTML = '<i class="fas fa-tachometer-alt"></i><span>Speed Test</span>';
-        btn.disabled = false;
-    }
-}
     </script>
-
-    <!-- Add missing CSS classes -->
-    <style>
-        .cs-status-badge.pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-        
-        .cs-status-badge.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: var(--space-md) var(--space-lg);
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-            box-shadow: var(--shadow-lg);
-            z-index: 1002;
-            animation: slideInRight 0.3s ease;
-            max-width: 400px;
-        }
-        
-        .notification.success {
-            border-left: 4px solid var(--success);
-        }
-        
-        .notification.error {
-            border-left: 4px solid var(--danger);
-        }
-        
-        .notification.info {
-            border-left: 4px solid var(--info);
-        }
-        
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-    </style>
 </body>
 </html>
