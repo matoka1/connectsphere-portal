@@ -76,7 +76,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     line-height: 1.5;
     color: var(--dark);
-    background-color: var(--light);
+    background-color: var(--white); /* Changed from --light to always be white */
     overflow-x: hidden;
 }
 
@@ -1698,47 +1698,529 @@ textarea:focus-visible {
     }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --light: #0F172A;
-        --dark: #F8FAFC;
-        --white: #1E293B;
-        --gray-100: #334155;
-        --gray-200: #475569;
-        --gray-300: #64748B;
-        --gray-400: #94A3B8;
-        --gray-500: #CBD5E1;
-        --gray-600: #E2E8F0;
-        --gray-700: #F1F5F9;
-        --gray-800: #F8FAFC;
-        --gray-900: #FFFFFF;
-        
-        --primary-light: rgba(0, 102, 255, 0.2);
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-        --shadow-md: 0 6px 15px -1px rgba(0, 0, 0, 0.4);
-        --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
-        --shadow-xl: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
+/* REMOVED DARK MODE SUPPORT - Only light theme now */
+
+/* For the Dashboard Specific Styles */
+.cs-loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.cs-loading-content {
+    text-align: center;
+    color: var(--white);
+    animation: fadeIn 0.5s ease;
+}
+
+.cs-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--white);
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--space-lg);
+}
+
+.cs-loading-content h2 {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+    font-weight: 700;
+}
+
+.cs-loading-content p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+}
+
+/* Dashboard Navigation */
+.cs-navbar {
+    background: var(--white);
+    box-shadow: var(--shadow);
+    padding: 0 var(--space-xl);
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.cs-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.cs-navbar-menu {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+}
+
+.cs-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--gray-600);
+    text-decoration: none;
+    padding: var(--space-sm) 0;
+    position: relative;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+.cs-nav-item:hover {
+    color: var(--primary);
+}
+
+.cs-nav-item.active {
+    color: var(--primary);
+}
+
+.cs-nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+}
+
+.cs-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    margin-top: var(--space-sm);
+    display: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.cs-nav-item.dropdown:hover .cs-dropdown-menu {
+    display: block;
+}
+
+.cs-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.cs-dropdown-menu a:hover {
+    background: var(--gray-100);
+    color: var(--primary);
+}
+
+.cs-divider {
+    height: 1px;
+    background: var(--gray-200);
+    margin: var(--space-sm) 0;
+}
+
+/* Main Content Area */
+.cs-main-content {
+    flex: 1;
+    padding: var(--space-xl);
+    background: var(--light);
+}
+
+.cs-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Footer */
+.cs-footer {
+    background: var(--gray-900);
+    color: var(--white);
+    padding: var(--space-xl) 0;
+    text-align: center;
+}
+
+.cs-footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+}
+
+.cs-footer-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+}
+
+.cs-footer-brand i {
+    color: var(--primary);
+}
+
+.cs-footer-links {
+    display: flex;
+    gap: var(--space-xl);
+    justify-content: center;
+    margin: var(--space-lg) 0;
+}
+
+.cs-footer-links a {
+    color: var(--gray-400);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.cs-footer-links a:hover {
+    color: var(--white);
+}
+
+.cs-copyright {
+    color: var(--gray-400);
+    font-size: 0.9rem;
+    margin-top: var(--space-lg);
+}
+
+/* Dashboard Specific Styles */
+.cs-dashboard-header {
+    margin-bottom: var(--space-2xl);
+}
+
+.cs-dashboard-header h1 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 2.2rem;
+    margin-bottom: var(--space-sm);
+}
+
+.cs-dashboard-header p {
+    font-size: 1.1rem;
+    color: var(--gray-600);
+}
+
+.cs-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.cs-stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    box-shadow: var(--shadow);
+}
+
+.cs-stat-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-light);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.cs-stat-content h3 {
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: var(--space-xs);
+}
+
+.cs-stat-content p {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.cs-charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: var(--space-xl);
+    margin: var(--space-2xl) 0;
+}
+
+.cs-chart-container {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+}
+
+.cs-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+}
+
+.cs-chart-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--dark);
+}
+
+.cs-chart-header select {
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--white);
+    color: var(--dark);
+}
+
+.cs-status-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    margin: var(--space-2xl) 0;
+    box-shadow: var(--shadow);
+}
+
+.cs-status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+}
+
+.cs-status-header h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    color: var(--dark);
+}
+
+.cs-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cs-status-indicator.connected {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.cs-status-indicator.connected i {
+    color: var(--success);
+}
+
+.cs-status-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.cs-status-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.cs-status-label {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+}
+
+.cs-status-value {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.cs-recent-activity {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    margin: var(--space-2xl) 0;
+    box-shadow: var(--shadow);
+}
+
+.cs-recent-activity h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    color: var(--dark);
+}
+
+.cs-activity-table {
+    overflow-x: auto;
+}
+
+.cs-activity-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cs-activity-table th {
+    text-align: left;
+    padding: var(--space-md);
+    border-bottom: 2px solid var(--gray-200);
+    color: var(--gray-700);
+    font-weight: 600;
+}
+
+.cs-activity-table td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-600);
+}
+
+.cs-status-badge {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.cs-status-badge.completed,
+.cs-status-badge.successful,
+.cs-status-badge.paid,
+.cs-status-badge.resolved {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.cs-status-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.cs-status-badge.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.cs-quick-actions {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+}
+
+.cs-quick-actions h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    color: var(--dark);
+}
+
+.cs-action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-lg);
+}
+
+.cs-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius);
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cs-action-btn:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.cs-action-btn i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.cs-action-btn span {
+    font-weight: 500;
+}
+
+.cs-disconnect-btn {
+    background: var(--danger);
+    color: var(--white);
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--space-lg);
+}
+
+.cs-disconnect-btn:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Responsive adjustments for dashboard */
+@media (max-width: 768px) {
+    .cs-charts-section {
+        grid-template-columns: 1fr;
     }
     
-    .plan-card,
-    .feature-card,
-    .payment-card {
-        background: var(--white);
-        border-color: var(--gray-200);
+    .cs-stats-grid {
+        grid-template-columns: 1fr 1fr;
     }
     
-    .contact-form {
-        background: var(--gray-100);
+    .cs-action-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .cs-stats-grid {
+        grid-template-columns: 1fr;
     }
     
-    .connection-summary {
-        background: var(--gray-200);
-    }
-    
-    .notification {
-        background: var(--white);
-        color: var(--dark);
+    .cs-action-buttons {
+        grid-template-columns: 1fr;
     }
 }
